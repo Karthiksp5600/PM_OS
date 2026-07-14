@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://productpilot.ai/schemas/shared/evaluation.schema.json",
+  "title": "ProductPilot Evaluation",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_valid",
+    "citation_coverage",
+    "citation_quality",
+    "hallucination_risk",
+    "completeness",
+    "consistency",
+    "instruction_following",
+    "confidence_calibration",
+    "business_logic_score",
+    "overall_score",
+    "decision",
+    "reasons",
+    "required_actions",
+    "retry_recommended",
+    "human_review_required"
+  ],
+  "properties": {
+    "schema_valid": {
+      "type": "boolean"
+    },
+    "citation_coverage": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "citation_quality": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "hallucination_risk": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "completeness": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "consistency": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "instruction_following": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "confidence_calibration": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "business_logic_score": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "overall_score": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "decision": {
+      "type": "string",
+      "enum": ["pass", "warn", "fail"]
+    },
+    "reasons": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "required_actions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "retry_recommended": {
+      "type": "boolean"
+    },
+    "human_review_required": {
+      "type": "boolean"
+    }
+  }
+}

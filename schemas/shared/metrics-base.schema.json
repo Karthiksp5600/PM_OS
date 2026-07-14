@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://productpilot.ai/schemas/shared/metrics-base.schema.json",
+  "title": "ProductPilot Base Metrics",
+  "type": "object",
+  "properties": {
+    "latency_ms": {
+      "type": "number",
+      "minimum": 0
+    },
+    "token_input": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "token_output": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "cost_usd": {
+      "type": "number",
+      "minimum": 0
+    },
+    "retry_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "input_completeness": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "output_completeness": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "citation_coverage": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "hallucination_risk": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "consistency_score": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "confidence_score": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "instruction_following": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "business_logic_score": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    }
+  }
+}

@@ -1,0 +1,149 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://productpilot.ai/schemas/agents/decision.schema.json",
+  "title": "Decision Agent Contract",
+  "allOf": [
+    {
+      "$ref": "../shared/stage-contract.schema.json"
+    }
+  ],
+  "unevaluatedProperties": false,
+  "required": ["stage_id", "agent_name", "input", "structured_output", "metrics"],
+  "properties": {
+    "stage_id": {
+      "const": "decision"
+    },
+    "agent_name": {
+      "const": "DecisionAgent"
+    },
+    "input": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["solution_evaluation", "critic_output", "persona_panel", "strategy_output"],
+      "properties": {
+        "solution_evaluation": {
+          "type": "object"
+        },
+        "critic_output": {
+          "type": "object"
+        },
+        "persona_panel": {
+          "type": "object"
+        },
+        "strategy_output": {
+          "type": "object"
+        },
+        "decision_criteria": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "structured_output": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["recommended_option", "decision_rationale", "rejected_options", "trade_off_summary", "decision_confidence"],
+      "properties": {
+        "recommended_option": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["name", "summary", "why_won"],
+          "properties": {
+            "name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "summary": {
+              "type": "string",
+              "minLength": 1
+            },
+            "why_won": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "decision_rationale": {
+          "type": "string",
+          "minLength": 1
+        },
+        "rejected_options": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "rejection_reason"],
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "rejection_reason": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        },
+        "trade_off_summary": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "decision_confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      }
+    },
+    "metrics": {
+      "allOf": [
+        {
+          "$ref": "../shared/metrics-base.schema.json"
+        },
+        {
+          "type": "object",
+          "required": [
+            "decision_clarity_score",
+            "recommendation_strength",
+            "alternative_coverage",
+            "tradeoff_completeness",
+            "decision_confidence"
+          ],
+          "properties": {
+            "decision_clarity_score": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "recommendation_strength": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "alternative_coverage": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "tradeoff_completeness": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "decision_confidence": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    }
+  }
+}

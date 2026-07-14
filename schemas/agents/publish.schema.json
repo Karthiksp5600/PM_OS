@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://productpilot.ai/schemas/agents/publish.schema.json",
+  "title": "Publish Agent Contract",
+  "allOf": [
+    {
+      "$ref": "../shared/stage-contract.schema.json"
+    }
+  ],
+  "unevaluatedProperties": false,
+  "required": ["stage_id", "agent_name", "input", "structured_output", "metrics"],
+  "properties": {
+    "stage_id": {
+      "const": "publish"
+    },
+    "agent_name": {
+      "const": "PublishAgent"
+    },
+    "input": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["approved_artifact", "destination", "approval_state"],
+      "properties": {
+        "approved_artifact": {
+          "type": "object"
+        },
+        "destination": {
+          "type": "string",
+          "enum": ["markdown", "pdf", "notion", "jira", "linear"]
+        },
+        "approval_state": {
+          "type": "string",
+          "enum": ["approved", "pending", "rejected"]
+        },
+        "format_options": {
+          "type": "object"
+        }
+      }
+    },
+    "structured_output": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["publish_status", "destination_url", "export_format", "audit_ref"],
+      "properties": {
+        "publish_status": {
+          "type": "string",
+          "enum": ["success", "failed", "partial"]
+        },
+        "destination_url": {
+          "type": ["string", "null"],
+          "format": "uri-reference"
+        },
+        "export_format": {
+          "type": "string",
+          "enum": ["markdown", "pdf", "html", "notion_page", "jira_issue", "linear_document"]
+        },
+        "audit_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "error_message": {
+          "type": ["string", "null"]
+        }
+      }
+    },
+    "metrics": {
+      "allOf": [
+        {
+          "$ref": "../shared/metrics-base.schema.json"
+        },
+        {
+          "type": "object",
+          "required": [
+            "publish_success_rate",
+            "export_latency_ms",
+            "formatting_integrity_score",
+            "artifact_fidelity_score",
+            "publish_retries"
+          ],
+          "properties": {
+            "publish_success_rate": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "export_latency_ms": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "formatting_integrity_score": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "artifact_fidelity_score": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "publish_retries": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    }
+  }
+}

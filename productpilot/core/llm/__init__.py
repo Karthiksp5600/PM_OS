@@ -1,0 +1,9 @@
+"""LLM integrations and abstractions for ProductPilot.
+"""
+
+from __future__ import annotations
+
+from .base import LLMProvider
+from .mock import MockLLMProvider
+
+__all__ = ["LLMProvider", "MockLLMProvider"]

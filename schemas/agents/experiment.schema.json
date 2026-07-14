@@ -1,0 +1,176 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://productpilot.ai/schemas/agents/experiment.schema.json",
+  "title": "Experiment Agent Contract",
+  "allOf": [
+    {
+      "$ref": "../shared/stage-contract.schema.json"
+    }
+  ],
+  "unevaluatedProperties": false,
+  "required": ["stage_id", "agent_name", "input", "structured_output", "metrics"],
+  "properties": {
+    "stage_id": {
+      "const": "experiment"
+    },
+    "agent_name": {
+      "const": "ExperimentAgent"
+    },
+    "input": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["recommended_option", "success_metrics", "constraints"],
+      "properties": {
+        "recommended_option": {
+          "type": "object"
+        },
+        "success_metrics": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "constraints": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "decision_summary": {
+          "type": "string"
+        }
+      }
+    },
+    "structured_output": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["hypotheses", "success_criteria", "experiment_design", "instrumentation_needs", "risks_of_invalidating"],
+      "properties": {
+        "hypotheses": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["statement", "expected_outcome"],
+            "properties": {
+              "statement": {
+                "type": "string",
+                "minLength": 1
+              },
+              "expected_outcome": {
+                "type": "string",
+                "minLength": 1
+              },
+              "failure_signal": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "success_criteria": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["metric_name", "target_value"],
+            "properties": {
+              "metric_name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "target_value": {
+                "type": ["string", "number"]
+              },
+              "measurement_window": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "experiment_design": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "setup", "duration"],
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": ["a_b_test", "pilot", "qualitative_test", "prototype_test", "analytics_probe"]
+            },
+            "setup": {
+              "type": "string",
+              "minLength": 1
+            },
+            "sample": {
+              "type": "string"
+            },
+            "duration": {
+              "type": "string",
+              "minLength": 1
+            },
+            "analysis_plan": {
+              "type": "string"
+            }
+          }
+        },
+        "instrumentation_needs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "risks_of_invalidating": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "metrics": {
+      "allOf": [
+        {
+          "$ref": "../shared/metrics-base.schema.json"
+        },
+        {
+          "type": "object",
+          "required": [
+            "hypothesis_clarity",
+            "testability_score",
+            "instrumentation_completeness",
+            "success_criteria_completeness",
+            "experiment_risk_score"
+          ],
+          "properties": {
+            "hypothesis_clarity": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "testability_score": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "instrumentation_completeness": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "success_criteria_completeness": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "experiment_risk_score": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    }
+  }
+}

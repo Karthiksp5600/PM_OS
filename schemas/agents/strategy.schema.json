@@ -1,0 +1,122 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://productpilot.ai/schemas/agents/strategy.schema.json",
+  "title": "Strategy Agent Contract",
+  "allOf": [
+    {
+      "$ref": "../shared/stage-contract.schema.json"
+    }
+  ],
+  "unevaluatedProperties": false,
+  "required": ["stage_id", "agent_name", "input", "structured_output", "metrics"],
+  "properties": {
+    "stage_id": {
+      "const": "strategy"
+    },
+    "agent_name": {
+      "const": "StrategyAgent"
+    },
+    "input": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["solution_summary", "roadmap_context", "okr_context"],
+      "properties": {
+        "solution_summary": {
+          "type": "string",
+          "minLength": 1
+        },
+        "roadmap_context": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "okr_context": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "market_context": {
+          "type": "string"
+        }
+      }
+    },
+    "structured_output": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["strategic_fit", "roadmap_alignment", "okr_alignment", "sequencing_guidance", "strategic_risks"],
+      "properties": {
+        "strategic_fit": {
+          "type": "string"
+        },
+        "roadmap_alignment": {
+          "type": "string"
+        },
+        "okr_alignment": {
+          "type": "string"
+        },
+        "sequencing_guidance": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "strategic_risks": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "recommended_posture": {
+          "type": "string"
+        }
+      }
+    },
+    "metrics": {
+      "allOf": [
+        {
+          "$ref": "../shared/metrics-base.schema.json"
+        },
+        {
+          "type": "object",
+          "required": [
+            "strategic_fit_score",
+            "okr_alignment_score",
+            "roadmap_alignment_score",
+            "sequencing_score",
+            "portfolio_fit_score"
+          ],
+          "properties": {
+            "strategic_fit_score": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "okr_alignment_score": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "roadmap_alignment_score": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "sequencing_score": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "portfolio_fit_score": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    }
+  }
+}
