@@ -1,0 +1,52 @@
+{
+  "workflow_id": "wf_spotify_onboarding_001",
+  "tenant_id": "tenant_spotify",
+  "project_id": "proj_spotify_activation",
+  "entry_mode": "goal_driven",
+  "target_segment": "new Spotify Free users in the US",
+  "time_horizon": "the next quarter",
+  "user_intent": {
+    "goal": "Increase paid conversion and first-week listening retention for new Spotify Free users.",
+    "feedback_summary": null
+  },
+  "context": {
+    "company_context_refs": [
+      "doc_spotify_onboarding_strategy",
+      "doc_premium_conversion_research"
+    ],
+    "prior_stage_refs": [],
+    "retrieval_refs": [
+      "rag_spotify_new_user_flow",
+      "rag_spotify_support_tickets"
+    ],
+    "memory_refs": [
+      "mem_spotify_product_language"
+    ],
+    "source_notes": "Spotify data shows many newly signed-up users do not reach their first personalized playlist session within seven days. Support tickets mention confusion about where to start after account creation, and onboarding emails are not consistently driving the right next step."
+  },
+  "instructions": {
+    "task": "Frame the product discovery problem for Spotify onboarding and conversion.",
+    "constraints": [
+      "Do not propose a final solution yet.",
+      "Ground every major claim in the provided context."
+    ],
+    "success_criteria": [
+      "Clear problem statement",
+      "Explicit assumptions",
+      "Reviewable open questions"
+    ],
+    "output_style": "concise_product_discovery"
+  },
+  "budgets": {
+    "token_budget": 4000,
+    "latency_budget_ms": 120000,
+    "retry_count": 0,
+    "cost_budget_usd": 0.25
+  },
+  "policy": {
+    "approval_required": true,
+    "can_write_memory": false,
+    "can_publish": false,
+    "sensitivity": "internal"
+  }
+}

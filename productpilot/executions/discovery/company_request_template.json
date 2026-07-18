@@ -1,0 +1,49 @@
+{
+  "workflow_id": "wf_company_discovery_001",
+  "tenant_id": "tenant_company",
+  "project_id": "proj_company_activation",
+  "entry_mode": "goal_driven",
+  "target_segment": "new users",
+  "time_horizon": "the next quarter",
+  "user_intent": {
+    "goal": "Improve activation and retention for new users.",
+    "feedback_summary": null
+  },
+  "context": {
+    "company_context_refs": [
+      "doc_company_strategy"
+    ],
+    "prior_stage_refs": [],
+    "retrieval_refs": [
+      "rag_company_onboarding",
+      "rag_company_support"
+    ],
+    "memory_refs": [],
+    "source_notes": "Use customer research, product telemetry, and support feedback here."
+  },
+  "instructions": {
+    "task": "Frame the product discovery problem for the company and product context provided.",
+    "constraints": [
+      "Do not propose a final solution yet.",
+      "Ground every major claim in the provided context."
+    ],
+    "success_criteria": [
+      "Clear problem statement",
+      "Explicit assumptions",
+      "Reviewable open questions"
+    ],
+    "output_style": "concise_product_discovery"
+  },
+  "budgets": {
+    "token_budget": 4000,
+    "latency_budget_ms": 120000,
+    "retry_count": 0,
+    "cost_budget_usd": 0.25
+  },
+  "policy": {
+    "approval_required": true,
+    "can_write_memory": false,
+    "can_publish": false,
+    "sensitivity": "internal"
+  }
+}

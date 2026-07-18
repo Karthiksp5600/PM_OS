@@ -1,0 +1,192 @@
+{
+  "workflow_id": "wf_company_discovery_001",
+  "tenant_id": "tenant_company",
+  "project_id": "proj_company_activation",
+  "stage_id": "discovery",
+  "agent_name": "DiscoveryAgent",
+  "entry_mode": "goal_driven",
+  "user_intent": {
+    "goal": "Improve activation and retention for new users.",
+    "feedback_summary": null
+  },
+  "context": {
+    "company_context_refs": [
+      "doc_company_strategy"
+    ],
+    "prior_stage_refs": [],
+    "retrieval_refs": [
+      "rag_company_onboarding",
+      "rag_company_support"
+    ],
+    "memory_refs": [],
+    "source_notes": "Use customer research, product telemetry, and support feedback here."
+  },
+  "instructions": {
+    "task": "Frame the product discovery problem for the company and product context provided.",
+    "constraints": [
+      "Do not propose a final solution yet.",
+      "Ground every major claim in the provided context."
+    ],
+    "success_criteria": [
+      "Clear problem statement",
+      "Explicit assumptions",
+      "Reviewable open questions"
+    ],
+    "output_style": "concise_product_discovery"
+  },
+  "budgets": {
+    "token_budget": 4000,
+    "latency_budget_ms": 120000,
+    "retry_count": 0,
+    "cost_budget_usd": 0.25
+  },
+  "policy": {
+    "approval_required": true,
+    "can_write_memory": false,
+    "can_publish": false,
+    "sensitivity": "internal"
+  },
+  "status": "success",
+  "timestamp": "2026-07-18T14:44:26.072666+00:00",
+  "input": {
+    "mode": "goal_driven",
+    "goal": "Improve activation and retention for new users.",
+    "feedback_summary": null,
+    "target_segment": "new users",
+    "time_horizon": "the next quarter",
+    "business_context": "Use customer research, product telemetry, and support feedback here.",
+    "constraints": [
+      "Do not propose a final solution yet.",
+      "Ground every major claim in the provided context."
+    ],
+    "supporting_links": []
+  },
+  "structured_output": {
+    "problem_statement": "new users need a clearer path from the stated business goal to a solvable product problem: Improve activation and retention for new users. The discovery focus is to define the user behavior, constraint, or unmet need that most directly blocks that goal.",
+    "problem_statements": [
+      "new users are struggling to move from the stated goal to a clear, solvable product problem around Improve activation and retention for new users.",
+      "The onboarding or first-use journey does not yet create a strong enough path to value for new users.",
+      "new users may be blocked by a missing or unclear step that prevents them from reaching the desired outcome.",
+      "There appears to be an unmet need or behavioral barrier for new users that is not yet well defined.",
+      "The current product experience leaves new users without a clear reason to continue toward the intended outcome."
+    ],
+    "why_now": "The business goal creates a timely need to clarify the product problem before solutioning. The strongest available signal is: Use customer research, product telemetry, and support feedback here.",
+    "problem_scope": {
+      "in_scope": [
+        "User journey and product area connected to: Improve activation and retention for new users",
+        "Needs, blockers, and motivations for new users",
+        "Metrics that can prove the problem is improving",
+        "Evidence-backed assumptions that need validation"
+      ],
+      "out_of_scope": [
+        "Final solution selection",
+        "Detailed engineering implementation",
+        "Unapproved roadmap commitment",
+        "Work that violates constraint: Do not propose a final solution yet.",
+        "Work that violates constraint: Ground every major claim in the provided context."
+      ]
+    },
+    "key_assumptions": [
+      "The stated input represents a meaningful product or business signal.",
+      "The issue can be improved through product intervention rather than only process or go-to-market changes.",
+      "The team can access enough evidence to validate the problem before committing to a solution.",
+      "The starting input may be too terse and may need human clarification."
+    ],
+    "open_questions": [
+      "Which user segment is most affected by this problem?",
+      "What metric currently proves the problem exists?",
+      "What behavior change would show that the problem is solved?"
+    ],
+    "success_definition": "Success means new users show measurable improvement in the behavior or outcome blocked by 'Improve activation and retention for new users' within the next quarter, without harming guardrail metrics.",
+    "evidence_map": [
+      {
+        "claim": "new users need a clearer path from the stated business goal to a solvable product problem: Improve activation and retention for new users. The discovery focus is to define the user behavior, constraint, or unmet need that most directly blocks that goal.",
+        "source_id": "rag_company_onboarding",
+        "note": "Primary claim for discovery framing."
+      },
+      {
+        "claim": "The business goal creates a timely need to clarify the product problem before solutioning. The strongest available signal is: Use customer research, product telemetry, and support feedback here.",
+        "source_id": "rag_company_support",
+        "note": "Timing and urgency claim."
+      }
+    ]
+  },
+  "citations": [
+    {
+      "source_id": "rag_company_onboarding",
+      "claim": "new users need a clearer path from the stated business goal to a solvable product problem: Improve activation and retention for new users. The discovery focus is to define the user behavior, constraint, or unmet need that most directly blocks that goal.",
+      "source_type": "rag",
+      "excerpt": "Use customer research, product telemetry, and support feedback here",
+      "confidence": 0.82,
+      "trust_score": 0.82,
+      "relevance_score": 0.82
+    },
+    {
+      "source_id": "rag_company_support",
+      "claim": "The business goal creates a timely need to clarify the product problem before solutioning. The strongest available signal is: Use customer research, product telemetry, and support feedback here.",
+      "source_type": "rag",
+      "excerpt": "Use customer research, product telemetry, and support feedback here",
+      "confidence": 0.82,
+      "trust_score": 0.82,
+      "relevance_score": 0.82
+    }
+  ],
+  "assumptions": [
+    "The stated input represents a meaningful product or business signal.",
+    "The issue can be improved through product intervention rather than only process or go-to-market changes.",
+    "The team can access enough evidence to validate the problem before committing to a solution.",
+    "The starting input may be too terse and may need human clarification."
+  ],
+  "open_questions": [
+    "Which user segment is most affected by this problem?",
+    "What metric currently proves the problem exists?",
+    "What behavior change would show that the problem is solved?"
+  ],
+  "warnings": [],
+  "errors": [],
+  "metrics": {
+    "latency_ms": 1708.769,
+    "token_input": 9,
+    "token_output": 568,
+    "cost_usd": 0,
+    "retry_count": 0,
+    "input_completeness": 1.0,
+    "output_completeness": 1.0,
+    "citation_coverage": 1.0,
+    "hallucination_risk": 0.18,
+    "consistency_score": 0.8500000000000001,
+    "confidence_score": 0.82,
+    "instruction_following": 0.92,
+    "business_logic_score": 0.84,
+    "problem_clarity_score": 1.0,
+    "scope_precision": 1.0,
+    "assumption_quality_score": 1.0,
+    "evidence_to_claim_ratio": 1.0,
+    "root_cause_confidence": 0.72,
+    "open_question_count": 3
+  },
+  "evaluation": {
+    "schema_valid": true,
+    "citation_coverage": 1.0,
+    "citation_quality": 0.82,
+    "hallucination_risk": 0.18,
+    "completeness": 1.0,
+    "consistency": 0.8500000000000001,
+    "instruction_following": 0.92,
+    "confidence_calibration": 0.82,
+    "business_logic_score": 0.84,
+    "overall_score": 0.906,
+    "decision": "pass",
+    "reasons": [
+      "All required discovery output fields are present.",
+      "Core discovery claims include citation coverage.",
+      "The problem statement is specific enough for downstream KPI work."
+    ],
+    "required_actions": [],
+    "retry_recommended": false,
+    "human_review_required": true
+  },
+  "next_action": "continue_to_kpi_tree",
+  "artifact_ref": "art_19c9fe659c81c212",
+  "version": "discovery-agent-v1"
+}
