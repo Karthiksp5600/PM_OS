@@ -1,0 +1,72 @@
+[
+  {
+    "author": "fashion_forum_user_1",
+    "url": "https://forum.example.com/topic/wishlist-overload",
+    "timestamp": "2026-08-17T11:00:00",
+    "text": "My Myntra wishlist is overloaded now. I save heels and sneakers there, but when I come back later I cannot remember which ones were actually worth buying.",
+    "likes": 14
+  },
+  {
+    "author": "fashion_forum_user_2",
+    "url": "https://forum.example.com/topic/how-do-you-decide-what-to-buy",
+    "timestamp": "2026-08-18T13:35:00",
+    "text": "I treat wishlist like a moodboard for dresses. I hold off until I know the occasion and can see enough real customer photos to trust the look.",
+    "likes": 9
+  },
+  {
+    "author": "fashion_forum_user_3",
+    "url": "https://forum.example.com/topic/size-doubt-on-saved-products",
+    "timestamp": "2026-08-19T19:50:00",
+    "text": "For saved shoes I still leave Myntra to look for fit reviews and styling tips, because the app alone does not remove my doubt.",
+    "likes": 17
+  },
+  {
+    "author": "fashion_forum_user_4",
+    "url": "https://forum.example.com/topic/saved-items-for-events",
+    "timestamp": "2026-08-20T16:00:00",
+    "text": "I save festive outfits in wishlist and wait until I confirm the event mood, so many products sit there for weeks.",
+    "likes": 11
+  },
+  {
+    "author": "fashion_forum_user_5",
+    "url": "https://forum.example.com/topic/wishlist-bookmarks",
+    "timestamp": "2026-08-21T08:45:00",
+    "text": "My wishlist is basically a bookmark list for outfits I might buy later, but later often never comes because I lose context.",
+    "likes": 12
+  },
+  {
+    "author": "fashion_forum_user_6",
+    "url": "https://forum.example.com/topic/fit-guidance-needed",
+    "timestamp": "2026-08-21T10:20:00",
+    "text": "Saved shoes on Myntra need better fit cues. Without them, I end up researching elsewhere and forgetting to come back.",
+    "likes": 18
+  },
+  {
+    "author": "fashion_forum_user_7",
+    "url": "https://forum.example.com/topic/too-many-saved-items",
+    "timestamp": "2026-08-21T12:00:00",
+    "text": "Once my wishlist crosses twenty products, it stops helping me choose and starts making every decision harder.",
+    "likes": 15
+  },
+  {
+    "author": "fashion_forum_user_8",
+    "url": "https://forum.example.com/topic/styling-proof-before-buying",
+    "timestamp": "2026-08-21T14:15:00",
+    "text": "I save dresses and tops, but I need styling proof from influencers or real users before I convert those saved items.",
+    "likes": 10
+  },
+  {
+    "author": "fashion_forum_user_9",
+    "url": "https://forum.example.com/topic/occasion-led-saving",
+    "timestamp": "2026-08-21T17:30:00",
+    "text": "Most of my saved ethnic wear is tied to potential events, so if plans change those wishlist items never get bought.",
+    "likes": 9
+  },
+  {
+    "author": "fashion_forum_user_10",
+    "url": "https://forum.example.com/topic/comparison-across-apps",
+    "timestamp": "2026-08-21T20:10:00",
+    "text": "I shortlist products on Myntra but still compare them against AJIO and other apps, and that slows me down a lot.",
+    "likes": 13
+  }
+]

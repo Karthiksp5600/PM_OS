@@ -1,0 +1,62 @@
+[
+  {
+    "publisher": "Vogue India",
+    "url": "https://www.vogue.in/content/how-shoppers-use-fashion-wishlists-before-purchase",
+    "timestamp": "2026-08-14T09:10:00",
+    "text": "Fashion shoppers often use wishlist features as a bookmarking step before buying, especially when they still need fit guidance, styling context, or stronger reviews."
+  },
+  {
+    "publisher": "StyleSpeak Blog",
+    "url": "https://stylespeak.example.com/myntra-wishlist-buy-later-research",
+    "timestamp": "2026-08-15T12:25:00",
+    "text": "Users who save footwear under ₹2000 frequently compare options across marketplaces and then lose track of what they shortlisted."
+  },
+  {
+    "publisher": "Retail UX Notes",
+    "url": "https://retailux.example.com/fashion-wishlist-conversion-signals",
+    "timestamp": "2026-08-16T16:40:00",
+    "text": "Wishlist-heavy shoppers research try on videos, creator opinions, and customer photos before converting on apparel purchases."
+  },
+  {
+    "publisher": "Marketplace Lens",
+    "url": "https://marketplacelens.example.com/wishlist-comparison-fatigue",
+    "timestamp": "2026-08-17T09:30:00",
+    "text": "Saved fashion items often go unpurchased because cross-market comparison and long wishlists create decision fatigue."
+  },
+  {
+    "publisher": "Fashion Behaviour Lab",
+    "url": "https://fashionlab.example.com/wishlist-fit-confidence-study",
+    "timestamp": "2026-08-18T09:00:00",
+    "text": "Saved fashion products often remain unpurchased because shoppers still need fit confidence and authentic user reviews before committing."
+  },
+  {
+    "publisher": "Commerce Memo",
+    "url": "https://commercememo.example.com/fashion-wishlist-decision-fatigue",
+    "timestamp": "2026-08-18T11:15:00",
+    "text": "Decision fatigue increases as fashion wishlists grow, making saved items less likely to convert without prioritization support."
+  },
+  {
+    "publisher": "Retail India Insight",
+    "url": "https://retailindia.example.com/wishlist-moodboard-fashion",
+    "timestamp": "2026-08-19T13:30:00",
+    "text": "Many fashion shoppers use wishlists as moodboards or bookmarks rather than immediate purchase queues, especially in high-consideration categories."
+  },
+  {
+    "publisher": "Product Research Weekly",
+    "url": "https://productweekly.example.com/review-gap-wishlist-conversion",
+    "timestamp": "2026-08-19T16:20:00",
+    "text": "Insufficient customer imagery and shallow review depth are major causes of wishlist non-conversion in fashion ecommerce."
+  },
+  {
+    "publisher": "Marketplace Design Review",
+    "url": "https://marketdesign.example.com/fashion-saved-items-comparison",
+    "timestamp": "2026-08-20T10:40:00",
+    "text": "Users who compare saved products across multiple fashion marketplaces often delay or abandon purchasing despite strong initial intent."
+  },
+  {
+    "publisher": "Shopper Signal",
+    "url": "https://shoppersignal.example.com/wishlist-return-behavior-fashion",
+    "timestamp": "2026-08-21T12:05:00",
+    "text": "Returning to long saved lists without strong prioritization cues leads to forgotten products and reduced wishlist-to-purchase conversion."
+  }
+]
