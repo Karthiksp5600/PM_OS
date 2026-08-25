@@ -15,6 +15,7 @@ from productpilot.discovery.classifiers.rule_based import RuleBasedWishlistClass
 from productpilot.discovery.connectors.crawlee import CrawleeConnector, load_crawlee_start_urls, load_crawlee_targets
 from productpilot.discovery.connectors.duckduckgo import DuckDuckGoConnector
 from productpilot.discovery.connectors.forum import ForumConnector
+from productpilot.discovery.connectors.kaggle_myntra import load_myntra_kaggle_connectors
 from productpilot.discovery.connectors.maxcrawl import MaxCrawlConnector, load_maxcrawl_targets
 from productpilot.discovery.connectors.play_store import PlayStoreConnector
 from productpilot.discovery.connectors.reddit import RedditConnector
@@ -55,7 +56,7 @@ class DiscoveryEngineService:
             TwitterXConnector(self.data_dir / "seed_twitter_x_posts.json"),
             DuckDuckGoConnector(self.data_dir / "seed_duckduckgo_results.json"),
             ForumConnector(self.data_dir / "seed_forum_posts.json"),
-        ]
+        ] + load_myntra_kaggle_connectors(self.base_dir)
 
     def _expand_records(
         self,

@@ -51,7 +51,7 @@ class OpportunityAggregator:
                     intent_signals=[group[0].classification.intent_signal],
                 )
             )
-        return sorted(opportunities, key=lambda item: (item.evidence_count, item.source_count), reverse=True)
+        return sorted(opportunities, key=self._sort_key)
 
     def build_evidence_chunks(self, records: List[ClassifiedRecord], opportunities: List[OpportunityRecord]) -> List[EvidenceChunk]:
         chunks: List[EvidenceChunk] = []
@@ -98,3 +98,8 @@ class OpportunityAggregator:
     def _contains_monetary_incentive(self, text: str) -> bool:
         lowered = text.lower()
         return any(term in lowered for term in MONETARY_TERMS)
+
+    def _sort_key(self, item: OpportunityRecord) -> tuple[bool, int, int, str]:
+        is_other_bucket = FrictionType.OTHER in item.friction_types or item.name.startswith("{0}:".format(FrictionType.OTHER.value))
+        is_unclear_bucket = any(signal.value == "unclear" for signal in item.intent_signals) or item.name.endswith(":unclear")
+        return (is_other_bucket or is_unclear_bucket, -item.evidence_count, -item.source_count, item.name)

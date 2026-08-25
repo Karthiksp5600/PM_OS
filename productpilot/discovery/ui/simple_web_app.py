@@ -40,6 +40,28 @@ RUN_STATE: Dict[str, Any] = {
 }
 
 
+def sort_opportunities_payload(opportunities: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    def is_other(opportunity: dict[str, Any]) -> bool:
+        name = str(opportunity.get("name", ""))
+        friction_types = [str(item) for item in (opportunity.get("friction_types") or [])]
+        return name.startswith("other:") or "other" in friction_types
+
+    def is_unclear(opportunity: dict[str, Any]) -> bool:
+        name = str(opportunity.get("name", ""))
+        intent_signals = [str(item) for item in (opportunity.get("intent_signals") or [])]
+        return name.endswith(":unclear") or "unclear" in intent_signals
+
+    return sorted(
+        opportunities,
+        key=lambda item: (
+            is_other(item) or is_unclear(item),
+            -int(item.get("evidence_count", 0) or 0),
+            -int(item.get("source_count", 0) or 0),
+            str(item.get("name", "")),
+        ),
+    )
+
+
 def update_run_state(**kwargs: Any) -> None:
     with RUN_STATE_LOCK:
         RUN_STATE.update(kwargs)
@@ -296,7 +318,49 @@ HTML_PAGE = """<!doctype html>
       display: grid;
       grid-template-columns: repeat(5, minmax(0, 1fr));
       gap: 14px;
-      margin-bottom: 18px;
+    }
+
+    .tab-shell {
+      display: grid;
+      gap: 18px;
+    }
+
+    .tabs {
+      display: inline-flex;
+      gap: 10px;
+      padding: 8px;
+      border-radius: 18px;
+      background: rgba(148, 163, 184, 0.10);
+      border: 1px solid rgba(148, 163, 184, 0.14);
+      width: fit-content;
+    }
+
+    .tab-button {
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid transparent;
+      padding: 12px 18px;
+    }
+
+    .tab-button.active {
+      color: white;
+      background: linear-gradient(135deg, var(--primary-strong), var(--primary));
+      box-shadow: 0 10px 30px rgba(79, 110, 247, 0.22);
+    }
+
+    .tab-pane {
+      display: none;
+    }
+
+    .tab-pane.active {
+      display: block;
+    }
+
+    .main-focus {
+      display: grid;
+      grid-template-columns: minmax(0, 1.08fr) minmax(360px, 0.92fr);
+      gap: 18px;
+      align-items: start;
     }
 
     .metric-card {
@@ -687,6 +751,7 @@ HTML_PAGE = """<!doctype html>
 
     @media (max-width: 1120px) {
       .hero,
+      .main-focus,
       .dashboard,
       .pipeline-grid,
       .metrics {
@@ -723,7 +788,7 @@ HTML_PAGE = """<!doctype html>
           discounts, cashback, coupons, and other monetary incentives.
         </p>
         <div class="hero-chips">
-          <span class="chip">Play Store, Reddit, DuckDuckGo, Forum seeds</span>
+          <span class="chip">Play Store, Reddit, DuckDuckGo, forum, Kaggle Myntra reviews</span>
           <span class="chip">Evidence-backed answers</span>
           <span class="chip">Non-monetary recommendation guardrail</span>
         </div>
@@ -746,118 +811,131 @@ HTML_PAGE = """<!doctype html>
       </div>
     </section>
 
-    <section class="metrics">
-      <div class="metric-card">
-        <div class="metric-label">Source Types</div>
-        <div class="metric-value" id="metricSources">0</div>
-        <div class="metric-sub" id="metricSourcesSub">No source coverage yet</div>
+    <section class="tab-shell">
+      <div class="tabs" role="tablist" aria-label="Discovery views">
+        <button id="insightsTabBtn" class="tab-button active" type="button" data-tab="insights" role="tab" aria-selected="true">Ranked opportunities</button>
+        <button id="coverageTabBtn" class="tab-button" type="button" data-tab="coverage" role="tab" aria-selected="false">Coverage metrics</button>
       </div>
-      <div class="metric-card">
-        <div class="metric-label">Parsed</div>
-        <div class="metric-value" id="metricFetched">0</div>
-        <div class="metric-sub" id="metricFetchedSub">Raw records ingested</div>
-      </div>
-      <div class="metric-card">
-        <div class="metric-label">Cleaned</div>
-        <div class="metric-value" id="metricCleaned">0</div>
-        <div class="metric-sub" id="metricCleanedSub">Unique normalized records</div>
-      </div>
-      <div class="metric-card">
-        <div class="metric-label">Relevant</div>
-        <div class="metric-value" id="metricRelevant">0</div>
-        <div class="metric-sub" id="metricRelevantSub">Wishlist-related text units</div>
-      </div>
-      <div class="metric-card">
-        <div class="metric-label">Opportunities</div>
-        <div class="metric-value" id="metricOpportunities">0</div>
-        <div class="metric-sub" id="metricOpportunitiesSub">No ranked themes yet</div>
-      </div>
-    </section>
 
-    <section class="dashboard">
-      <div class="stack">
-        <div class="panel">
-          <div class="panel-header">
-            <div>
-              <h2 class="panel-title">Pipeline control</h2>
-              <p class="panel-subtitle">Run the local seeded vertical slice, then browse ranked opportunities without reading raw markdown.</p>
-            </div>
-            <div class="actions">
-              <button id="runBtn" class="primary" type="button">Run full pipeline</button>
-              <button id="refreshBtn" class="secondary" type="button">Reload outputs</button>
-            </div>
-          </div>
-
-          <div class="pipeline-grid">
-            <div class="pipeline-steps">
-              <div class="step">
-                <div class="step-kicker">Step 1</div>
-                <div>Ingest evidence</div>
-                <div class="step-copy">Loads Play Store, Reddit, DuckDuckGo, and forum text units into the local SQLite store with deduped content hashes.</div>
+      <section id="insightsTab" class="tab-pane active" role="tabpanel">
+        <div class="main-focus">
+          <div class="panel">
+            <div class="panel-header">
+              <div>
+                <h2 class="panel-title">Ranked opportunities</h2>
+                <p class="panel-subtitle">Top friction themes are shown as cards with confidence, evidence counts, and sample excerpts.</p>
               </div>
-              <div class="step">
-                <div class="step-kicker">Step 2</div>
-                <div>Classify intent + friction</div>
-                <div class="step-copy">Tags each unit with intent, friction type, comparison behavior, off-platform research, and other context hints.</div>
-              </div>
-              <div class="step">
-                <div class="step-kicker">Step 3</div>
-                <div>Rank opportunities</div>
-                <div class="step-copy">Groups evidence into opportunity themes and applies the hard filter against monetary-incentive recommendations.</div>
+              <div class="actions">
+                <a id="downloadOpportunitiesBtn" class="button-link secondary" href="/api/ranked-opportunities.md" download="ranked_opportunities.md">Download opportunities (.md)</a>
               </div>
             </div>
-            <div id="statusBox" class="status-box">Ready. Click “Run full pipeline” to refresh source coverage, cleaned records, and the latest opportunities.</div>
+            <div id="opportunitiesBox" class="opportunities-grid"></div>
           </div>
-        </div>
 
-        <div class="panel">
-          <div class="panel-header">
-            <div>
-              <h2 class="panel-title">Ranked opportunities</h2>
-              <p class="panel-subtitle">Top friction themes are shown as cards with confidence, evidence counts, and sample excerpts.</p>
+          <div class="panel">
+            <div class="panel-header">
+              <div>
+                <h2 class="panel-title">Ask the engine</h2>
+                <p class="panel-subtitle">Query the indexed evidence and get a grounded answer with confidence and source citations.</p>
+              </div>
             </div>
-            <div class="actions">
-              <a id="downloadOpportunitiesBtn" class="button-link secondary" href="/api/ranked-opportunities.md" download="ranked_opportunities.md">Download opportunities (.md)</a>
+            <input id="questionInput" class="question-input" type="text" value="What's the top friction point for footwear under ₹2000?" />
+            <div class="ask-row">
+              <button id="askBtn" class="primary" type="button">Ask question</button>
+              <a id="downloadAnswerBtn" class="button-link secondary disabled" href="/api/final-answer.md" download="final_answer.md">Download answer (.md)</a>
             </div>
+            <div id="answerBox" class="answer-card">
+              <div class="answer-meta">
+                <strong>Answer</strong>
+                <span class="badge low" id="confidenceBadge">Not run</span>
+              </div>
+              <div id="answerText" class="answer-text">Run the slice and ask a question to see a grounded answer.</div>
+              <div id="noticeBox"></div>
+            </div>
+            <div id="citationsBox" class="citations-grid"></div>
           </div>
-          <div id="opportunitiesBox" class="opportunities-grid"></div>
         </div>
-      </div>
+      </section>
 
-      <div class="stack">
-        <div class="panel">
-          <div class="panel-header">
-            <div>
-              <h2 class="panel-title">Ask the engine</h2>
-              <p class="panel-subtitle">Query the indexed evidence and get a grounded answer with confidence and source citations.</p>
-            </div>
-          </div>
-          <input id="questionInput" class="question-input" type="text" value="What's the top friction point for footwear under ₹2000?" />
-          <div class="ask-row">
-            <button id="askBtn" class="primary" type="button">Ask question</button>
-            <a id="downloadAnswerBtn" class="button-link secondary disabled" href="/api/final-answer.md" download="final_answer.md">Download answer (.md)</a>
-          </div>
-          <div id="answerBox" class="answer-card">
-            <div class="answer-meta">
-              <strong>Answer</strong>
-              <span class="badge low" id="confidenceBadge">Not run</span>
-            </div>
-            <div id="answerText" class="answer-text">Run the slice and ask a question to see a grounded answer.</div>
-            <div id="noticeBox"></div>
-          </div>
-          <div id="citationsBox" class="citations-grid"></div>
-        </div>
+      <section id="coverageTab" class="tab-pane" role="tabpanel">
+        <div class="dashboard">
+          <div class="stack">
+            <section class="metrics">
+              <div class="metric-card">
+                <div class="metric-label">Source Types</div>
+                <div class="metric-value" id="metricSources">0</div>
+                <div class="metric-sub" id="metricSourcesSub">No source coverage yet</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-label">Parsed</div>
+                <div class="metric-value" id="metricFetched">0</div>
+                <div class="metric-sub" id="metricFetchedSub">Raw records ingested</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-label">Cleaned</div>
+                <div class="metric-value" id="metricCleaned">0</div>
+                <div class="metric-sub" id="metricCleanedSub">Unique normalized records</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-label">Relevant</div>
+                <div class="metric-value" id="metricRelevant">0</div>
+                <div class="metric-sub" id="metricRelevantSub">Wishlist-related text units</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-label">Opportunities</div>
+                <div class="metric-value" id="metricOpportunities">0</div>
+                <div class="metric-sub" id="metricOpportunitiesSub">No ranked themes yet</div>
+              </div>
+            </section>
 
-        <div class="panel">
-          <div class="panel-header">
-            <div>
-              <h2 class="panel-title">Source coverage</h2>
-              <p class="panel-subtitle">See how many sources were taken, how many records were cleaned, and the breakdown by source.</p>
+            <div class="panel">
+              <div class="panel-header">
+                <div>
+                  <h2 class="panel-title">Pipeline control</h2>
+                  <p class="panel-subtitle">Run the local seeded vertical slice, then inspect source coverage and output quality.</p>
+                </div>
+                <div class="actions">
+                  <button id="runBtn" class="primary" type="button">Run full pipeline</button>
+                  <button id="refreshBtn" class="secondary" type="button">Reload outputs</button>
+                </div>
+              </div>
+
+              <div class="pipeline-grid">
+                <div class="pipeline-steps">
+                  <div class="step">
+                    <div class="step-kicker">Step 1</div>
+                    <div>Ingest evidence</div>
+                    <div class="step-copy">Loads Play Store, Reddit, DuckDuckGo, forum, Crawlee, and optional Myntra Kaggle sources into the local SQLite store with deduped content hashes.</div>
+                  </div>
+                  <div class="step">
+                    <div class="step-kicker">Step 2</div>
+                    <div>Classify intent + friction</div>
+                    <div class="step-copy">Tags each unit with intent, friction type, comparison behavior, off-platform research, and other context hints.</div>
+                  </div>
+                  <div class="step">
+                    <div class="step-kicker">Step 3</div>
+                    <div>Rank opportunities</div>
+                    <div class="step-copy">Groups evidence into opportunity themes and applies the hard filter against monetary-incentive recommendations.</div>
+                  </div>
+                </div>
+                <div id="statusBox" class="status-box">Ready. Click “Run full pipeline” to refresh source coverage, cleaned records, and the latest opportunities.</div>
+              </div>
             </div>
           </div>
-          <div id="sourceBox" class="source-list"></div>
+
+          <div class="stack">
+            <div class="panel">
+              <div class="panel-header">
+                <div>
+                  <h2 class="panel-title">Source coverage</h2>
+                  <p class="panel-subtitle">See how many sources were taken, how many records were cleaned, and the breakdown by source.</p>
+                </div>
+              </div>
+              <div id="sourceBox" class="source-list"></div>
+            </div>
+          </div>
         </div>
-      </div>
+      </section>
     </section>
   </div>
 
@@ -890,6 +968,16 @@ HTML_PAGE = """<!doctype html>
         .replace(/\b\w/g, function(match) { return match.toUpperCase(); });
     }
 
+    function activateTab(tabName) {
+      const isInsights = tabName !== 'coverage';
+      byId('insightsTab').classList.toggle('active', isInsights);
+      byId('coverageTab').classList.toggle('active', !isInsights);
+      byId('insightsTabBtn').classList.toggle('active', isInsights);
+      byId('coverageTabBtn').classList.toggle('active', !isInsights);
+      byId('insightsTabBtn').setAttribute('aria-selected', isInsights ? 'true' : 'false');
+      byId('coverageTabBtn').setAttribute('aria-selected', isInsights ? 'false' : 'true');
+    }
+
     async function fetchJson(url, options) {
       const requestOptions = Object.assign({ cache: 'no-store' }, options || {});
       const method = (requestOptions.method || 'GET').toUpperCase();
@@ -912,7 +1000,7 @@ HTML_PAGE = """<!doctype html>
       byId('metricCleaned').textContent = String(uniqueRecords);
       byId('metricCleanedSub').textContent = 'Unique normalized records';
       byId('metricRelevant').textContent = String(stats.relevant_records || 0);
-      byId('metricRelevantSub').textContent = 'Wishlist-related text units';
+      byId('metricRelevantSub').textContent = 'Wishlist-related records after classification';
       byId('metricOpportunities').textContent = String(stats.opportunity_count || opportunities.length || 0);
       byId('metricOpportunitiesSub').textContent = (stats.opportunity_count || opportunities.length) ? 'Ranked friction themes loaded' : 'No ranked themes yet';
 
@@ -933,7 +1021,32 @@ HTML_PAGE = """<!doctype html>
         return;
       }
 
-      box.innerHTML = opportunities.map(function(opportunity) {
+      const sortedOpportunities = opportunities.slice().sort(function(left, right) {
+        function isBottomBucket(opportunity) {
+          const name = String(opportunity.name || '');
+          const frictionTypes = opportunity.friction_types || [];
+          const intentSignals = opportunity.intent_signals || [];
+          const isOther = name.indexOf('other:') === 0 || frictionTypes.indexOf('other') !== -1;
+          const isUnclear = name.endsWith(':unclear') || intentSignals.indexOf('unclear') !== -1;
+          return isOther || isUnclear;
+        }
+
+        const leftBottom = isBottomBucket(left);
+        const rightBottom = isBottomBucket(right);
+        if (leftBottom !== rightBottom) return leftBottom ? 1 : -1;
+
+        const leftEvidence = Number(left.evidence_count || 0);
+        const rightEvidence = Number(right.evidence_count || 0);
+        if (leftEvidence !== rightEvidence) return rightEvidence - leftEvidence;
+
+        const leftSources = Number(left.source_count || 0);
+        const rightSources = Number(right.source_count || 0);
+        if (leftSources !== rightSources) return rightSources - leftSources;
+
+        return String(left.name || '').localeCompare(String(right.name || ''));
+      });
+
+      box.innerHTML = sortedOpportunities.map(function(opportunity) {
         const samples = (opportunity.sample_excerpts || []).slice(0, 2).map(function(sample) {
           return '<div class="sample">' + escapeHtml(sample) + '</div>';
         }).join('');
@@ -1181,10 +1294,13 @@ HTML_PAGE = """<!doctype html>
     byId('runBtn').addEventListener('click', runSlice);
     byId('refreshBtn').addEventListener('click', function() { reloadOutputs('reload'); });
     byId('askBtn').addEventListener('click', askQuestion);
+    byId('insightsTabBtn').addEventListener('click', function() { activateTab('insights'); });
+    byId('coverageTabBtn').addEventListener('click', function() { activateTab('coverage'); });
     byId('questionInput').addEventListener('keydown', function(event) {
       if (event.key === 'Enter') askQuestion();
     });
 
+    activateTab('insights');
     reloadOutputs('initial');
     fetchProgress().catch(function() { return null; });
   </script>
@@ -1203,7 +1319,7 @@ class DiscoveryRequestHandler(BaseHTTPRequestHandler):
             opportunities_path = ROOT / "productpilot" / "discovery" / "data" / "outputs" / "opportunities.json"
             opportunities = []
             if opportunities_path.exists():
-                opportunities = json.loads(opportunities_path.read_text(encoding="utf-8"))
+                opportunities = sort_opportunities_payload(json.loads(opportunities_path.read_text(encoding="utf-8")))
             self._send_json(
                 {
                     "stats": SERVICE.dashboard_stats(),
@@ -1237,7 +1353,7 @@ class DiscoveryRequestHandler(BaseHTTPRequestHandler):
             opportunities_path = ROOT / "productpilot" / "discovery" / "data" / "outputs" / "opportunities.json"
             opportunities = []
             if opportunities_path.exists():
-                opportunities = json.loads(opportunities_path.read_text(encoding="utf-8"))
+                opportunities = sort_opportunities_payload(json.loads(opportunities_path.read_text(encoding="utf-8")))
             self._send_json({"opportunities": opportunities})
             return
         self._send_json({"error": "Not found"}, status=404)
