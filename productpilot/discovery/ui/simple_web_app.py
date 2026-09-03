@@ -10,6 +10,7 @@ Then open:
 from __future__ import annotations
 
 import json
+import os
 import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -1310,10 +1311,27 @@ HTML_PAGE = """<!doctype html>
 
 
 class DiscoveryRequestHandler(BaseHTTPRequestHandler):
+    def do_HEAD(self) -> None:
+        parsed = urlparse(self.path)
+        if parsed.path in {"/", "/health"}:
+            self.send_response(200)
+            if parsed.path == "/health":
+                self.send_header("Content-Type", "application/json; charset=utf-8")
+            else:
+                self.send_header("Content-Type", "text/html; charset=utf-8")
+            self.send_header("Cache-Control", "no-store, no-cache, must-revalidate")
+            self.end_headers()
+            return
+        self.send_response(404)
+        self.end_headers()
+
     def do_GET(self) -> None:
         parsed = urlparse(self.path)
         if parsed.path == "/":
             self._send_html(HTML_PAGE)
+            return
+        if parsed.path == "/health":
+            self._send_json({"status": "ok"})
             return
         if parsed.path == "/api/dashboard":
             opportunities_path = ROOT / "productpilot" / "discovery" / "data" / "outputs" / "opportunities.json"
@@ -1416,8 +1434,8 @@ class DiscoveryRequestHandler(BaseHTTPRequestHandler):
 
 
 def main() -> None:
-    host = "127.0.0.1"
-    port = 8765
+    host = os.getenv("HOST", "0.0.0.0")
+    port = int(os.getenv("PORT", "8765"))
     server = ThreadingHTTPServer((host, port), DiscoveryRequestHandler)
     print("Serving Myntra discovery UI at http://{0}:{1}".format(host, port))
     server.serve_forever()

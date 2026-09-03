@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Myntra Wishlist Maturation Layer</title>
+  <style>
+    :root {
+      --ink: #27313a;
+      --muted: #586675;
+      --line: #c8d0d7;
+      --blue: #0a5fa8;
+      --blue-dark: #06477f;
+      --pale: #eef5fb;
+      --paler: #f7fafc;
+      --white: #ffffff;
+    }
+    * { box-sizing: border-box; }
+    html { background: #e9edf0; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: #e9edf0;
+      font-family: Aptos, Calibri, Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    .slide {
+      position: relative;
+      width: 13.333in;
+      height: 7.5in;
+      margin: 18px auto;
+      padding: .36in .46in .30in;
+      overflow: hidden;
+      background: var(--white);
+      box-shadow: 0 2px 12px rgba(0, 0, 0, .12);
+      page-break-after: always;
+      break-after: page;
+    }
+    h1 {
+      margin: 0;
+      color: var(--ink);
+      font-size: 22pt;
+      line-height: 1.12;
+      letter-spacing: -.35pt;
+      font-weight: 700;
+    }
+    .rule { height: 2px; margin: .14in 0 .18in; background: var(--line); }
+    .content { height: 5.95in; }
+    p, li, td, th, .metric, .flow-step { font-size: 14pt; line-height: 1.23; }
+    p { margin: 0 0 9px; }
+    ul { margin: 0; padding-left: 20px; }
+    li { margin: 0 0 6px; }
+    strong { color: #1f2e3b; }
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: .24in; }
+    .three-col { display: grid; grid-template-columns: repeat(3, 1fr); gap: .18in; }
+    .split-wide { display: grid; grid-template-columns: 1.42fr .98fr; gap: .23in; }
+    .card {
+      min-width: 0;
+      padding: .15in .17in;
+      border: 1px solid #d5e0ea;
+      border-radius: 12px;
+      background: var(--pale);
+    }
+    .card.white { background: var(--white); }
+    .card p:last-child, .card ul:last-child { margin-bottom: 0; }
+    .metric-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: .13in; margin-bottom: .16in; }
+    .metric { padding: .12in .14in; border-left: 4px solid var(--blue); background: var(--paler); font-weight: 700; }
+    .metric small { display: block; margin-top: 3px; color: var(--muted); font-size: 14pt; font-weight: 400; line-height: 1.15; }
+    table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+    th { padding: 8px 10px; color: var(--white); background: var(--blue); text-align: left; font-weight: 700; }
+    td { padding: 8px 10px; vertical-align: top; border: 1px solid #ccd5dc; }
+    tr:nth-child(even) td { background: var(--paler); }
+    .small td, .small th { font-size: 14pt; line-height: 1.18; }
+    .compact li { margin-bottom: 4px; font-size: 14pt; line-height: 1.18; }
+    .evidence { border-left: 4px solid var(--blue); padding-left: 12px; }
+    .quote { color: #40515f; font-style: italic; }
+    .flow { display: grid; grid-template-columns: repeat(7, 1fr); gap: 7px; align-items: stretch; }
+    .flow-step { position: relative; padding: 9px 8px; background: var(--pale); border: 1px solid #d5e0ea; border-radius: 7px; font-weight: 700; }
+    .flow-step:not(:last-child)::after { content: "→"; position: absolute; right: -13px; top: 50%; z-index: 2; color: var(--blue-dark); font-size: 18pt; transform: translateY(-54%); }
+    .flow-step small { display: block; margin-top: 5px; color: var(--muted); font-size: 14pt; line-height: 1.15; font-weight: 400; }
+    .mini { font-size: 14pt; line-height: 1.18; }
+    .note { color: var(--muted); font-size: 14pt; line-height: 1.16; }
+    .risk td:first-child { color: #1f2e3b; font-weight: 700; }
+    .page-tabs { position: fixed; right: 12px; top: 12px; z-index: 4; display: flex; flex-direction: column; gap: 4px; }
+    .page-tabs a { width: 30px; padding: 5px 0; color: #fff; background: #52616d; border-radius: 3px; text-align: center; text-decoration: none; font-size: 14pt; }
+    @media print {
+      @page { size: 13.333in 7.5in; margin: 0; }
+      html, body { background: #fff; }
+      .slide { margin: 0; box-shadow: none; }
+      .page-tabs { display: none; }
+    }
+    @media screen and (max-width: 1100px) {
+      .slide { transform-origin: top left; transform: scale(.72); margin-bottom: calc(18px - 2.1in); }
+    }
+    @media screen and (max-width: 780px) {
+      .slide { transform: scale(.49); margin-bottom: calc(18px - 3.825in); }
+    }
+  </style>
+</head>
+<body>
+  <nav class="page-tabs" aria-label="Slide pages">
+    <a href="#slide-1">1</a><a href="#slide-2">2</a><a href="#slide-3">3</a><a href="#slide-4">4</a><a href="#slide-5">5</a><a href="#slide-6">6</a><a href="#slide-7">7</a><a href="#slide-8">8</a><a href="#slide-9">9</a><a href="#slide-10">10</a>
+  </nav>
+
+  <section class="slide" id="slide-1">
+    <h1>Myntra can convert more saved intent by resolving the uncertainty that blocks purchase</h1><div class="rule"></div>
+    <div class="content split-wide">
+      <div>
+        <p>Myntra shoppers frequently discover products they like across apparel, footwear, beauty and accessories, but many purchases do not happen because interest is captured while confidence is not.</p>
+        <p>The current wishlist acts mainly as a bookmark. A shopper saves an item when unsure, exits the app, returns later with the same doubt, and leaves the item unpurchased.</p>
+        <div class="evidence"><p><strong>Current journey:</strong> Need → Browse → Save to wishlist → Exit app → Return later → Still uncertain → No purchase.</p></div>
+        <p style="margin-top:14px"><strong>Why this matters:</strong> high-intent products remain unpurchased; marketing must re-acquire people who have already expressed intent; and large inactive wishlists reinforce browsing rather than buying.</p>
+      </div>
+      <div class="card">
+        <p><strong>Purchase blockers named in the source:</strong></p><ul>
+          <li>Fit and sizing uncertainty</li><li>Insufficient review confidence</li><li>Comparison paralysis</li><li>Styling uncertainty</li><li>Occasion mismatch</li><li>Decision postponement</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" id="slide-2">
+    <h1>The research base points to a wishlist used for consideration, not an immediate purchase queue</h1><div class="rule"></div>
+    <div class="content">
+      <div class="metric-grid">
+        <div class="metric">9 source types<small>covered in the latest discovery run</small></div>
+        <div class="metric">36,228 records<small>normalised and deduplicated</small></div>
+        <div class="metric">1,348 records<small>identified as relevant wishlist evidence</small></div>
+        <div class="metric">31 opportunities<small>ranked from the evidence base</small></div>
+        <div class="metric">686 bookmark signals<small>vs. 16 price-watch and 6 purchase-intent signals</small></div>
+        <div class="metric">Repeatable evidence store<small>cleaned records persisted for traceability</small></div>
+      </div>
+      <div class="two-col">
+        <div class="card white compact"><p><strong>Coverage and preparation:</strong></p><ul><li>Sources include Google Play and Apple App Store reviews, Reddit, YouTube comments, X/Twitter, search results, forums, Myntra Kaggle reviews, and live-web results.</li><li>Inputs were standardized into source, URL, timestamp, text, rating, engagement, and raw metadata; duplicate feedback was removed using text-based deduplication.</li><li>Seeded datasets support stable demos, with optional live crawling for fresh evidence.</li></ul></div>
+        <div class="card white compact"><p><strong>Recurring frictions:</strong></p><ul><li>Size and fit uncertainty; limited customer photos and trustworthy reviews.</li><li>Too many saved items, creating decision fatigue and loss of context.</li><li>Difficulty comparing products across platforms, plus limited styling and occasion guidance.</li><li>Opportunity: make the wishlist a decision-support experience that raises shopper confidence.</li></ul></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" id="slide-3">
+    <h1>Fit doubt, weak social proof, and comparison effort are the strongest documented causes of stalled wishlist purchases</h1><div class="rule"></div>
+    <div class="content two-col">
+      <div>
+        <table class="small"><thead><tr><th style="width:29%">Hesitation pattern</th><th>Evidence in the source document</th></tr></thead><tbody>
+          <tr><td>Fit and size doubt</td><td>22 snippets, the highest-confidence pattern, cite inconsistent sizing, lack of customer photos, or fabric uncertainty. Users spend 90+ seconds on size charts and photo zooms before saving.</td></tr>
+          <tr><td>Review gap</td><td>16 snippets show shoppers saving items until stronger proof appears. Users return expecting richer reviews or customer photos, find no new evidence, and abandon.</td></tr>
+          <tr><td>Comparison paralysis</td><td>13 snippets show people moving between Myntra and AJIO, then losing track of the products they had shortlisted.</td></tr>
+          <tr><td>Styling and occasion doubt</td><td>20 snippets across occasion mismatch and styling uncertainty describe outfits saved for hypothetical events without enough confidence to buy.</td></tr>
+        </tbody></table>
+      </div>
+      <div class="card"><p><strong>The Hesitant Booker:</strong> a monthly active user who saves 5+ items each month but purchases fewer than 1 wishlisted item. They browse actively and signal interest by saving, then defer because fit, review, or styling doubt remains unresolved.</p><p class="quote">“I still leave the app to check YouTube try-on videos or compare with AJIO before I commit.”</p><p class="quote">“Once there are too many saved products I stop making decisions. The list becomes overwhelming.”</p><p><strong>Observed workarounds:</strong> external try-on and image search, familiar brands or known sizes, cross-platform comparison, moodboard use, and waiting for reviews to accumulate.</p></div>
+    </div>
+  </section>
+
+  <section class="slide" id="slide-4">
+    <h1>The wishlist has a resolution problem: it stores intent but does not close the confidence gap</h1><div class="rule"></div>
+    <div class="content three-col">
+      <div class="card"><p>Users do not avoid saved items because they lack interest. Uncertainty about fit, fabric quality, styling compatibility, and occasion appropriateness makes unfamiliar products feel risky.</p><p>The wishlist captures the moment of interest, then does nothing to resolve the uncertainty that caused the save.</p></div>
+      <div class="card"><p>Fit/size doubt (22), review gaps (16), and comparison paralysis (13) account for 51 of the 89+ behavioral snippets in the corpus.</p><p>Users leave Myntra for YouTube, Google, Reddit, AJIO, or Amazon validation. Those workarounds show the missing decision support is material.</p></div>
+      <div class="card"><p>For shoppers: less guessing, more confidence, safer exploration, and fewer forgotten items.</p><p>For Myntra: a higher share of saved items can move to purchase without new acquisition; stronger differentiation; and potentially lower expectation-led fit and styling returns.</p><p>Myntra already has reviews, returns, size selections, co-purchases, and browse behavior; the document identifies a product-architecture gap rather than a missing-data gap.</p></div>
+    </div>
+  </section>
+
+  <section class="slide" id="slide-5">
+    <h1>The Maturation Layer is the selected MVP because it targets the documented root causes without new user effort</h1><div class="rule"></div>
+    <div class="content split-wide">
+      <div>
+        <p>The proposed Maturation Layer turns a passive wishlist into a confidence system. After a save, it diagnoses likely hesitation from pre-save behavior, gathers relevant evidence over 24–72 hours, and returns a Verdict Card when the case is ready.</p>
+        <table class="small"><thead><tr><th style="width:31%">Option</th><th style="width:16%">Confidence</th><th style="width:17%">Complexity</th><th>Source-grounded assessment</th></tr></thead><tbody>
+          <tr><td>The Maturation Layer</td><td>High</td><td>Medium</td><td>Addresses fit, review, and comparison concerns using reviews, returns, co-purchases, and clickstream; requires no new permissions.</td></tr>
+          <tr><td>Smart notification engine</td><td>Low</td><td>Low</td><td>Handles price timing, which appears in only 5 medium-confidence snippets; it reminds users but does not resolve doubt.</td></tr>
+          <tr><td>AR try-on and virtual styling</td><td>Medium</td><td>High</td><td>Can help fit or styling but requires camera, 3D assets, and continuous calibration; it misses review gaps and comparison needs.</td></tr>
+        </tbody></table>
+      </div>
+      <div class="card"><ul class="compact"><li><strong>Resolution, not organization:</strong> unlike Collections, it responds to why an item was saved.</li><li><strong>Uses existing signals:</strong> review text, return patterns, size selections, co-purchase graphs, and browsing behavior.</li><li><strong>Low user burden:</strong> no measurements, wardrobe scan, or calendar permission.</li><li><strong>Trackable lifecycle:</strong> diagnose → gather → verdict → trust/override.</li><li><strong>No discount dependency:</strong> conversion is driven by confidence, not urgency.</li></ul></div>
+    </div>
+  </section>
+
+  <section class="slide" id="slide-6">
+    <h1>The Maturation Layer uses a clear evidence lifecycle to turn “save” into a confident purchase decision</h1><div class="rule"></div>
+    <div class="content">
+      <div class="flow">
+        <div class="flow-step">Save<small>Item is liked but not bought; size-chart dwell, review scrolls, image zooms, similar-product views, and repeat PDP visits signal doubt.</small></div>
+        <div class="flow-step">Diagnose<small>Classify fit, review, fabric, styling, comparison, or occasion uncertainty.</small></div>
+        <div class="flow-step">Hold<small>Show a quiet “Building your verdict” state while evidence matures.</small></div>
+        <div class="flow-step">Case file<small>Use reviews, returns, size selections, co-purchases, similar buyers, and saved-item comparisons.</small></div>
+        <div class="flow-step">Verdict<small>Return a recommendation with reasons and watch-outs after 24–72 hours.</small></div>
+        <div class="flow-step">Trust or override<small>User either accepts the verdict or says what remains unresolved.</small></div>
+        <div class="flow-step">Add to bag<small>Purchase and drop-off outcomes improve the next verdict.</small></div>
+      </div>
+      <div class="two-col" style="margin-top:.20in">
+        <div class="card white"><p><strong>Fit:</strong> recommended size from past purchases, similar-buyer feedback, return reasons, and runs-small/true-to-size/large summary.</p><p><strong>Review:</strong> positive and negative themes, customer photo availability, recency, verified-buyer signals, and common complaints.</p><p><strong>Comparison and styling:</strong> product differences, better-rated alternative, best use case, outfit pairings, and occasion suitability.</p></div>
+        <div class="card white"><p>The wishlist action becomes a deferred decision rather than a saved SKU. The product stays wishlist-native, so it does not depend on generic price drops, restocks, or repeated notifications.</p><p>Every override can capture the unresolved blocker, allowing future evidence to be more specific without asking for extensive user input.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" id="slide-7">
+    <h1>A Verdict Card should show the evidence behind the recommendation, not simply push the product</h1><div class="rule"></div>
+    <div class="content two-col">
+      <div class="card white"><p><strong>Source-proposed Verdict Card example: Strong Buy Confidence</strong></p><p><strong>Why Myntra recommends buying:</strong></p><ul class="compact"><li>87% of similar buyers kept this item.</li><li>Most reviews say the fabric matches product photos.</li><li>Similar users preferred size M.</li><li>Works for festive and semi-formal occasions.</li><li>Better rated than 4 of 6 similar saved kurtas.</li></ul><p style="margin-top:10px"><strong>Watch out:</strong> some users found sleeves slightly tight; it may not suit a relaxed-fit preference.</p><p><strong>Suggested action:</strong> size M, 84% confidence, festive/dinner outing use case.</p></div>
+      <div class="card"><p><strong>Trust Verdict:</strong> moves the item to a purchase-ready state, with “Add to Bag” as the next action. The user acts on confidence-backed evidence rather than a blind purchase.</p><p><strong>Override:</strong> asks one light follow-up on what remains unresolved: size, reviews, a better alternative elsewhere, price/value, need, or style.</p><p><strong>Purchase or drop-off:</strong> records which evidence supported conversion or which blocker remained. The source proposes using this feedback to improve later verdicts.</p><p class="note">The quantitative verdict figures on this page are explicitly presented as an example in the source document, not as validated Myntra performance data.</p></div>
+    </div>
+  </section>
+
+  <section class="slide" id="slide-8">
+    <h1>Success should be measured by whether saved intent becomes a better, confident purchase decision</h1><div class="rule"></div>
+    <div class="content split-wide">
+      <div>
+        <div class="card"><p><strong>30-Day Wishlist Purchase Conversion</strong></p><p>Users purchasing at least one previously wishlisted item within 30 days ÷ users adding at least one item to wishlist. This directly measures whether saved intent converts into purchase.</p></div>
+        <div class="flow" style="grid-template-columns: repeat(5, 1fr); margin-top:.18in"><div class="flow-step">Wishlist revisit</div><div class="flow-step">Product evaluation</div><div class="flow-step">Add to bag</div><div class="flow-step">Purchase</div><div class="flow-step">Repeat conversion</div></div>
+        <p class="mini" style="margin-top:.16in"><strong>Feature chain:</strong> Verdict Card → Case File → Trust / Override → Add to Bag.</p>
+      </div>
+      <div class="card white"><p><strong>Leading indicators:</strong> Verdict Card View Rate, Case File Open Rate, Trust Verdict Rate, Wishlist-to-Cart Rate, Override Rate, and Time to Decision.</p><p><strong>Outcome metrics:</strong> Wishlist-to-Purchase Rate, 30-Day Wishlist Purchase Conversion, Time to Purchase, Repeat Wishlist Conversion, and External Validation Reduction.</p><p><strong>Guardrails:</strong> Return Rate, Size/Fit Return Rate, Cancellation Rate, Negative Verdict Feedback, Session Disruption, and Notification Opt-outs.</p><p><strong>Experiment:</strong> users with 3+ wishlist additions in 30 days and fewer than 1 wishlist purchase; control is the existing wishlist, treatment is wishlist plus the Maturation Layer.</p><p><strong>Ship only if:</strong> conversion and wishlist-to-cart rise, time to purchase falls, and return or size/fit returns do not meaningfully increase.</p></div>
+    </div>
+  </section>
+
+  <section class="slide" id="slide-9">
+    <h1>The Maturation Layer should launch only where the evidence is strong enough to earn user trust</h1><div class="rule"></div>
+    <div class="content">
+      <table class="small risk"><thead><tr><th style="width:24%">Risk</th><th style="width:38%">Why it matters</th><th>Source-proposed mitigation</th></tr></thead><tbody>
+        <tr><td>Wrong verdicts</td><td>If an item disappoints after a user buys on a verdict, credibility falls.</td><td>Show confidence and evidence; do not generate verdicts below an evidence threshold.</td></tr>
+        <tr><td>Cold-start evidence gaps</td><td>New or low-review products may not support a reliable case file.</td><td>Show “Not enough evidence yet” instead of forcing a recommendation.</td></tr>
+        <tr><td>Generic verdicts</td><td>Vague statements such as “good product” are not trustworthy.</td><td>Use specific fit, fabric, review-theme, and comparison evidence.</td></tr>
+        <tr><td>Over-personalization</td><td>Users may feel their behavior is being tracked too closely.</td><td>Use transparent language such as “Based on reviews and similar purchases.”</td></tr>
+        <tr><td>Fit-confidence errors</td><td>Bad recommendations can create poor purchases and higher returns.</td><td>Treat size-related return rate as a hard guardrail.</td></tr>
+        <tr><td>Low adoption or notification fatigue</td><td>Users may miss the feature or ignore it if it behaves like another nudge.</td><td>Start wishlist-native with a subtle “Verdict Ready” badge; notify only for high-confidence verdicts.</td></tr>
+      </tbody></table>
+      <p style="margin-top:.16in">The source identifies the central risk as trust, not technical feasibility: a shallow, generic, or wrong case file will not reduce uncertainty. A narrow rollout is therefore safer than a broad launch in categories with weak review, return, or customer-photo coverage.</p>
+    </div>
+  </section>
+
+  <section class="slide" id="slide-10">
+    <h1>A staged rollout can prove usefulness before the wishlist becomes a broader decision layer</h1><div class="rule"></div>
+    <div class="content">
+      <table class="small"><thead><tr><th style="width:17%">Phase</th><th style="width:34%">Scope</th><th>Evidence of readiness</th></tr></thead><tbody>
+        <tr><td>0. Internal prototype</td><td>Use 20–30 products from 1–2 categories. Generate case files from existing reviews and mock behavior signals; test with internal users or 5–6 research participants.</td><td>Users understand the verdict, say it reduces effort, and can explain why they would trust or reject it.</td></tr>
+        <tr><td>1. Category pilot</td><td>Launch in a narrow, high-evidence category. The source suggests kurtas, dresses, sneakers, or jeans because they combine wishlist behavior with fit/style uncertainty and usable review/size feedback.</td><td>Higher Verdict Card engagement and wishlist-to-cart rate; lower time to decision; no increase in return rate.</td></tr>
+        <tr><td>2. High-intent users</td><td>Target people with 3+ saved products in 30 days, repeated wishlist revisits without a purchase, multiple similar saves, or review/size-chart/image-zoom behavior.</td><td>Lift in 30-day wishlist purchase conversion, more Trust Verdict clicks, lower Override Rate over time, and stable or lower size-related returns.</td></tr>
+        <tr><td>3. Full wishlist layer</td><td>Add Verdict Ready badges, case-file summaries, the Trust/Override loop, category-specific confidence models, and evidence-maturity logic across supported categories.</td><td>Sustained conversion lift, repeat Verdict Card use, reduced external validation, and stronger wishlist revisits.</td></tr>
+      </tbody></table>
+      <div class="evidence" style="margin-top:.16in"><p><strong>End state:</strong> the wishlist becomes conversion infrastructure first: it helps users decide between similar saved items, ranks items using confidence signals, and can later extend trust signals into product pages, carts, and recommendations.</p></div>
+    </div>
+  </section>
+
+</body>
+</html>

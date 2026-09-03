@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080" role="img" aria-labelledby="title description">
+  <title id="title">Myntra Wishlist Habit Loop</title>
+  <desc id="description">A simple black and white loop: Need, Browse, Save to Wishlist, Exit App, Return Later, Still Uncertain, No Purchase.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 14 14" refX="11" refY="7" markerWidth="12" markerHeight="12" orient="auto"><path d="M1 1 L12 7 L1 13 Z" fill="#000000"/></marker>
+    <style>
+      .label { font-family: 'DM Sans', sans-serif; font-size: 32px; font-weight: 700; fill: #000000; }
+      .label-inverse { font-family: 'DM Sans', sans-serif; font-size: 32px; font-weight: 700; fill: #FFFFFF; }
+      .number { font-family: 'DM Sans', sans-serif; font-size: 18px; font-weight: 700; fill: #000000; }
+      .number-inverse { font-family: 'DM Sans', sans-serif; font-size: 18px; font-weight: 700; fill: #FFFFFF; }
+    </style>
+  </defs>
+
+  <rect width="1920" height="1080" fill="#FFFFFF"/>
+
+  <!-- The arrows intentionally form one uninterrupted behaviour loop. -->
+  <path d="M 558 298 H 704" fill="none" stroke="#000000" stroke-width="5" marker-end="url(#arrow)"/>
+  <path d="M 1002 298 H 1148" fill="none" stroke="#000000" stroke-width="5" marker-end="url(#arrow)"/>
+  <path d="M 1513 330 C 1625 410, 1620 575, 1515 650" fill="none" stroke="#000000" stroke-width="5" marker-end="url(#arrow)"/>
+  <path d="M 1245 740 H 1085" fill="none" stroke="#000000" stroke-width="5" marker-end="url(#arrow)"/>
+  <path d="M 795 740 H 635" fill="none" stroke="#000000" stroke-width="5" marker-end="url(#arrow)"/>
+  <path d="M 410 740 C 250 700, 235 570, 305 540" fill="none" stroke="#000000" stroke-width="5" marker-end="url(#arrow)"/>
+  <path d="M 465 471 C 265 410, 275 280, 330 298" fill="none" stroke="#000000" stroke-width="5" marker-end="url(#arrow)"/>
+
+  <!-- 1 -->
+  <g transform="translate(330 230)">
+    <rect width="230" height="138" rx="69" fill="#FFFFFF" stroke="#000000" stroke-width="4"/>
+    <circle cx="45" cy="43" r="22" fill="#000000"/>
+    <text x="45" y="50" text-anchor="middle" class="number-inverse">1</text>
+    <text x="115" y="89" text-anchor="middle" class="label">Need</text>
+  </g>
+
+  <!-- 2 -->
+  <g transform="translate(704 230)">
+    <rect width="300" height="138" rx="69" fill="#FFFFFF" stroke="#000000" stroke-width="4"/>
+    <circle cx="45" cy="43" r="22" fill="#000000"/>
+    <text x="45" y="50" text-anchor="middle" class="number-inverse">2</text>
+    <text x="150" y="89" text-anchor="middle" class="label">Browse</text>
+  </g>
+
+  <!-- 3 -->
+  <g transform="translate(1148 230)">
+    <rect width="365" height="138" rx="69" fill="#000000"/>
+    <circle cx="45" cy="43" r="22" fill="#FFFFFF"/>
+    <text x="45" y="50" text-anchor="middle" class="number">3</text>
+    <text x="183" y="89" text-anchor="middle" class="label-inverse">Save to Wishlist</text>
+  </g>
+
+  <!-- 4 -->
+  <g transform="translate(1245 670)">
+    <rect width="300" height="138" rx="69" fill="#FFFFFF" stroke="#000000" stroke-width="4"/>
+    <circle cx="45" cy="43" r="22" fill="#000000"/>
+    <text x="45" y="50" text-anchor="middle" class="number-inverse">4</text>
+    <text x="150" y="89" text-anchor="middle" class="label">Exit App</text>
+  </g>
+
+  <!-- 5 -->
+  <g transform="translate(795 670)">
+    <rect width="290" height="138" rx="69" fill="#FFFFFF" stroke="#000000" stroke-width="4"/>
+    <circle cx="45" cy="43" r="22" fill="#000000"/>
+    <text x="45" y="50" text-anchor="middle" class="number-inverse">5</text>
+    <text x="145" y="89" text-anchor="middle" class="label">Return Later</text>
+  </g>
+
+  <!-- 6 -->
+  <g transform="translate(410 670)">
+    <rect width="330" height="138" rx="69" fill="#FFFFFF" stroke="#000000" stroke-width="4"/>
+    <circle cx="45" cy="43" r="22" fill="#000000"/>
+    <text x="45" y="50" text-anchor="middle" class="number-inverse">6</text>
+    <text x="165" y="89" text-anchor="middle" class="label">Still Uncertain</text>
+  </g>
+
+  <!-- 7 -->
+  <g transform="translate(305 471)">
+    <rect width="320" height="138" rx="69" fill="#000000"/>
+    <circle cx="45" cy="43" r="22" fill="#FFFFFF"/>
+    <text x="45" y="50" text-anchor="middle" class="number">7</text>
+    <text x="160" y="89" text-anchor="middle" class="label-inverse">No Purchase</text>
+  </g>
+</svg>

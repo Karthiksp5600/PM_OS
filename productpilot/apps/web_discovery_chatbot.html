@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Product Discovery Chatbot</title>
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --panel: #ffffff;
+      --line: #dfe7f3;
+      --primary: #1d4ed8;
+      --muted: #475569;
+      --user: #dbeafe;
+      --bot: #e2e8f0;
+      --text: #0f172a;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      font-family: Arial, sans-serif;
+      color: var(--text);
+    }
+    .container {
+      max-width: 1200px;
+      margin: 24px auto;
+      padding: 28px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      box-shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
+    }
+    h1 {
+      margin: 0 0 18px;
+      font-size: 32px;
+      letter-spacing: -0.03em;
+    }
+    .subhead {
+      color: var(--muted);
+      margin-bottom: 20px;
+      font-size: 15px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 20px;
+    }
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 18px;
+      background: #f8fbff;
+    }
+    .panel-title {
+      font-weight: 700;
+      margin-bottom: 8px;
+      display: block;
+    }
+    textarea, input, button {
+      width: 100%;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      font-size: 14px;
+      padding: 12px 14px;
+      margin-top: 10px;
+    }
+    textarea {
+      min-height: 220px;
+      resize: vertical;
+    }
+    .button-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .button-row button {
+      flex: 1;
+    }
+    button {
+      background: var(--primary);
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-weight: 700;
+      transition: opacity 0.15s ease;
+      border-radius: 10px;
+    }
+    button.secondary {
+      background: #64748b;
+    }
+    button.ghost {
+      background: #e2e8f0;
+      color: var(--text);
+      border: 1px solid var(--line);
+    }
+    button:hover { opacity: 0.95; }
+    .problem-list {
+      margin-top: 18px;
+      padding-left: 20px;
+      line-height: 1.7;
+      color: var(--muted);
+    }
+    .chat-box {
+      margin-top: 16px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #f8fafc;
+      min-height: 200px;
+      padding: 14px;
+    }
+    .message {
+      margin-bottom: 10px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      line-height: 1.5;
+    }
+    .user { background: var(--user); margin-left: 16px; }
+    .bot { background: var(--bot); margin-right: 16px; }
+    .tiny {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Wishlist Discovery Copilot</h1>
+    <div class="subhead">Discover the hidden user problem from a product brief, then ask follow-up questions about the generated opportunities.</div>
+
+    <div class="grid">
+      <div class="panel">
+        <span class="panel-title">Product brief</span>
+        <textarea id="contextInput"></textarea>
+        <div class="button-row">
+          <button id="loadBriefBtn" class="ghost" type="button">Load Myntra brief</button>
+          <button id="discoverBtn" type="button">Generate</button>
+        </div>
+        <div class="button-row">
+          <button id="clearBtn" class="secondary" type="button">Clear chat</button>
+          <button id="newSessionBtn" class="ghost" type="button">New session</button>
+        </div>
+        <div id="problemBox" class="problem-list"></div>
+      </div>
+
+      <div class="panel">
+        <span class="panel-title">Ask the discovery agent</span>
+        <input id="questionInput" type="text" value="What is the biggest issue?" />
+        <button id="askBtn" type="button">Ask</button>
+        <div id="chatBox" class="chat-box"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const DEFAULT_BRIEF = `You are a Product Manager on the Growth Team at Myntra.
+
+Millions of users browse fashion products, save items they like, and add products to their wishlists. A wishlist represents a particularly interesting signal: the user has expressed explicit interest in an item but has stopped short of purchasing it.
+
+Over time, users can accumulate dozens—or even hundreds—of wishlisted products, while only a small proportion eventually translate into purchases.
+
+One of your company’s strategic goals is to:
+
+Increase the percentage of users who purchase at least one item from their wishlist within 30 days of adding it.
+
+Improving wishlist-to-purchase conversion could increase purchase frequency, improve monetization from existing users, and help the company extract greater value from high-intent demand already present on the platform.
+
+However, you are not being given the underlying user problem. Your task is to discover it. And for the solution, the constraint is that you CANNOT offer monetary incentives to the users.`;
+
+    let discoveredProblems = [];
+
+    function normalizeText(value) {
+      return String(value || '').replace(/\s+/g, ' ').trim();
+    }
+
+    function buildProblemStatements(rawText) {
+      const topic = normalizeText(rawText) || 'this product';
+      const lines = topic.split(/\s+/).slice(0, 18).join(' ');
+      const base = [
+        `Wishlist users are accumulating products without a clear path to purchase, so intent is building without conversion.`,
+        `Users appear to save items for later because they are not yet ready to buy, but the current experience does not help them resolve that hesitation.`,
+        `The wishlist acts as a basket of intent, yet the product lacks a strong bridge between saved interest and final purchase confidence.`,
+        `Users may be struggling to compare, prioritize, or return to wishlisted items when they are ready to buy, causing intent to stall.`,
+        `The existing wishlist flow likely does not create enough urgency or decision support, so users defer purchase and never revisit the item.`,
+        `High-intent shoppers may not be receiving enough contextual nudges or reminders to convert saved favorites into a completed purchase.`,
+        `Users may be overwhelmed by the number of saved products, making it hard to decide what to buy next or which items still matter.`,
+        `The current experience may not help users feel confident that a wishlist item is still available, relevant, or worth buying later.`,
+        `Wishlist abandonment is likely driven by a lack of confidence, product readiness, or a weak off-platform conversion path rather than low intent.`,
+        `The fundamental problem is not that users do not want the product—it is that the product does not convert saved intent into a clear, actionable purchasing moment.`,
+      ];
+
+      if (rawText && rawText.toLowerCase().includes('myntra')) {
+        base.unshift(`Myntra users are expressing intent by saving products, but the platform does not yet turn that interest into a timely purchase decision.`);
+      }
+
+      return base.slice(0, 10);
+    }
+
+    function renderProblems() {
+      const box = document.getElementById('problemBox');
+      if (!discoveredProblems.length) {
+        box.innerHTML = 'No problem statements yet.';
+        return;
+      }
+
+      const list = document.createElement('ol');
+      discoveredProblems.forEach((problem) => {
+        const item = document.createElement('li');
+        item.textContent = problem;
+        list.appendChild(item);
+      });
+      box.innerHTML = '';
+      box.appendChild(list);
+    }
+
+    function addMessage(kind, text) {
+      const box = document.getElementById('chatBox');
+      const div = document.createElement('div');
+      div.className = 'message ' + kind;
+      div.textContent = text;
+      box.appendChild(div);
+    }
+
+    function generateFromContext() {
+      const raw = document.getElementById('contextInput').value;
+      const topic = normalizeText(raw);
+      if (!topic) {
+        addMessage('bot', 'Please enter a keyword or context first.');
+        return;
+      }
+
+      discoveredProblems = buildProblemStatements(raw);
+      renderProblems();
+      addMessage('bot', `I generated ${discoveredProblems.length} problem statements from the brief.`);
+    }
+
+    function clearChat() {
+      document.getElementById('chatBox').innerHTML = '';
+      discoveredProblems = [];
+      document.getElementById('problemBox').innerHTML = 'No problem statements yet.';
+    }
+
+    function answerQuestion(question) {
+      const q = normalizeText(question).toLowerCase();
+      if (!discoveredProblems.length) {
+        return 'Generate problem statements first.';
+      }
+
+      if (q.includes('what') && (q.includes('problem') || q.includes('issues') || q.includes('list'))) {
+        return discoveredProblems.slice(0, 5).map((p, i) => `${i + 1}. ${p}`).join('\n');
+      }
+
+      const scored = discoveredProblems.map((problem) => {
+        const lower = problem.toLowerCase();
+        let score = 0;
+        const words = q.match(/[a-z0-9]+/g) || [];
+        for (const word of words) {
+          if (word.length < 3) continue;
+          if (lower.includes(word)) score += 2;
+        }
+        return { score, problem };
+      }).sort((a, b) => b.score - a.score);
+
+      const top = scored[0];
+      if (!top || top.score === 0) {
+        return 'The main themes are: ' + discoveredProblems.slice(0, 3).join(' | ');
+      }
+
+      return 'The most relevant issue is: ' + top.problem + '\n\nRelated themes: ' + scored.slice(1, 4).map(item => item.problem).join(' | ');
+    }
+
+    document.getElementById('loadBriefBtn').addEventListener('click', () => {
+      document.getElementById('contextInput').value = DEFAULT_BRIEF;
+      addMessage('bot', 'Myntra brief loaded. Click Generate to create the problem statements.');
+    });
+
+    document.getElementById('discoverBtn').addEventListener('click', () => {
+      addMessage('user', 'Generate problems');
+      generateFromContext();
+    });
+
+    document.getElementById('clearBtn').addEventListener('click', () => {
+      document.getElementById('chatBox').innerHTML = '';
+      document.getElementById('questionInput').value = 'What is the biggest issue?';
+      document.getElementById('problemBox').innerHTML = 'No problem statements yet.';
+      discoveredProblems = [];
+    });
+
+    document.getElementById('newSessionBtn').addEventListener('click', () => {
+      document.getElementById('contextInput').value = DEFAULT_BRIEF;
+      clearChat();
+      addMessage('bot', 'New session started. The default Myntra brief is ready.');
+    });
+
+    document.getElementById('askBtn').addEventListener('click', () => {
+      const question = document.getElementById('questionInput').value;
+      addMessage('user', question);
+      addMessage('bot', answerQuestion(question));
+    });
+
+    document.getElementById('questionInput').addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') {
+        const question = document.getElementById('questionInput').value;
+        addMessage('user', question);
+        addMessage('bot', answerQuestion(question));
+      }
+    });
+
+    document.getElementById('contextInput').value = DEFAULT_BRIEF;
+    document.getElementById('problemBox').innerHTML = 'No problem statements yet.';
+    addMessage('bot', 'Default Myntra brief loaded. Click Generate to view the problem statements.');
+  </script>
+</body>
+</html>

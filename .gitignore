@@ -1,3 +1,7 @@
+.DS_Store
+.venv-crawlee/
+storage/
+productpilot/discovery/data/discovery.sqlite
 .env
 *.env
 __pycache__/

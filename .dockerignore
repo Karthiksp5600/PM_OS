@@ -1,0 +1,14 @@
+.git
+.gitignore
+.DS_Store
+.env
+*.env
+__pycache__/
+*.pyc
+.venv-crawlee/
+storage/
+tests/
+docs/
+examples/
+productpilot/discovery/data/discovery.sqlite
+productpilot/discovery/data/outputs/
