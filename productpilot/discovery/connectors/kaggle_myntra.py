@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import csv
+import gzip
 from datetime import datetime
 from hashlib import sha256
 import json
@@ -110,16 +111,25 @@ class KaggleMyntraConnector(SourceConnector):
         raise ValueError("No local file or remote URL configured for {0}".format(self.source_name))
 
     def _load_rows_from_path(self, path: Path) -> Iterable[Dict[str, str]]:
-        suffix = path.suffix.lower()
-        if suffix == ".csv":
-            with path.open(encoding="utf-8", newline="") as handle:
+        filename = path.name.lower()
+        if filename.endswith((".csv", ".csv.gz")):
+            if filename.endswith(".gz"):
+                handle = gzip.open(path, mode="rt", encoding="utf-8", newline="")
+            else:
+                handle = path.open(mode="r", encoding="utf-8", newline="")
+            with handle:
                 yield from csv.DictReader(handle)
             return
-        if suffix == ".json":
-            payload = json.loads(path.read_text(encoding="utf-8"))
+        if filename.endswith((".json", ".json.gz")):
+            if filename.endswith(".gz"):
+                handle = gzip.open(path, mode="rt", encoding="utf-8")
+            else:
+                handle = path.open(mode="r", encoding="utf-8")
+            with handle:
+                payload = json.load(handle)
             yield from self._coerce_row_dicts(payload)
             return
-        if suffix == ".jsonl":
+        if filename.endswith(".jsonl"):
             for line in path.read_text(encoding="utf-8").splitlines():
                 line = line.strip()
                 if not line:
@@ -269,9 +279,11 @@ def load_myntra_kaggle_connectors(base_dir: Path) -> list[SourceConnector]:
             "source": SourceName.KAGGLE_MYNTRA_APP_REVIEWS,
             "dataset_url": "https://www.kaggle.com/datasets/jocelyndumlao/shoppingappreviews-dataset",
             "filenames": (
+                "myntra-shopping-app-reviews.json.gz",
                 "myntra-shopping-app-reviews.json",
                 "myntra-shopping-app-reviews.csv",
                 "myntra-shopping-app-reviews.jsonl",
+                "Myntra.json.gz",
                 "Myntra.json",
                 "Myntra.csv",
             ),

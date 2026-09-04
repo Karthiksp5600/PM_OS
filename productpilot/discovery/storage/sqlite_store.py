@@ -92,6 +92,36 @@ class DiscoverySQLiteStore:
             conn.execute("DELETE FROM evidence_chunks")
             conn.execute("DELETE FROM opportunities")
 
+    def replace_pipeline_records(self, records: Iterable[NormalizedRecord]) -> None:
+        """Atomically replace raw evidence after all connectors have succeeded."""
+        rows = [
+            (
+                record.content_hash,
+                record.source.value,
+                record.url,
+                record.author_id_hash,
+                record.timestamp.isoformat(),
+                record.text,
+                record.rating,
+                record.upvotes_likes,
+                json.dumps(record.raw_payload),
+            )
+            for record in records
+        ]
+        with self._connect() as conn:
+            conn.execute("DELETE FROM raw_records")
+            conn.execute("DELETE FROM classified_records")
+            conn.execute("DELETE FROM evidence_chunks")
+            conn.execute("DELETE FROM opportunities")
+            conn.executemany(
+                """
+                INSERT INTO raw_records
+                (content_hash, source, url, author_id_hash, timestamp, text, rating, upvotes_likes, raw_payload)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                rows,
+            )
+
     def upsert_records(self, records: Iterable[NormalizedRecord]) -> None:
         with self._connect() as conn:
             conn.executemany(

@@ -41,11 +41,7 @@ class DiscoveryEngineService:
 
     def _crawlee_enabled(self) -> bool:
         configured = os.getenv("CRAWLEE_ENABLE")
-        if configured is not None:
-            return configured == "1"
-        default_python = self.base_dir / ".venv-crawlee" / "bin" / "python"
-        start_urls_file = self.data_dir / "crawlee_start_urls.txt"
-        return default_python.exists() and start_urls_file.exists()
+        return configured == "1"
 
     def _static_connectors(self) -> List[object]:
         return [
@@ -117,7 +113,6 @@ class DiscoveryEngineService:
         self,
         progress_callback: Optional[Callable[[str, Dict[str, Any]], None]] = None,
     ) -> Dict[str, Any]:
-        self.store.reset_pipeline_data()
         connectors = self._static_connectors()
         dynamic_source_count = 0
         crawlee_enabled = self._crawlee_enabled()
@@ -130,6 +125,7 @@ class DiscoveryEngineService:
         completed_sources: List[str] = []
         total_fetched = 0
         unique_hashes = set()
+        staged_records: List[NormalizedRecord] = []
         by_source: Dict[str, int] = {}
         seen_dedup_keys = set()
         static_goal = int(os.getenv("STATIC_RECORD_GOAL", os.getenv("INGEST_RECORD_GOAL", "3000")))
@@ -145,7 +141,7 @@ class DiscoveryEngineService:
                     "cleaned_records": 0,
                     "completed_sources": [],
                 },
-            )
+        )
         for connector in connectors:
             records = connector.fetch()
             target_for_source = max(
@@ -163,7 +159,7 @@ class DiscoveryEngineService:
                 seen_dedup_keys.add(dedup_key)
                 unique_records.append(record)
                 unique_hashes.add(dedup_key)
-            self.store.upsert_records(unique_records)
+            staged_records.extend(unique_records)
             by_source[connector.source_name] = len(unique_records)
             sources_completed += 1
             completed_sources.append(connector.source_name)
@@ -206,7 +202,7 @@ class DiscoveryEngineService:
                 seen_dedup_keys.add(dedup_key)
                 unique_crawlee_records.append(record)
                 unique_hashes.add(dedup_key)
-            self.store.upsert_records(unique_crawlee_records)
+            staged_records.extend(unique_crawlee_records)
             by_source[crawlee_connector.source_name] = len(unique_crawlee_records)
             sources_completed += 1
             completed_sources.append(crawlee_connector.source_name)
@@ -246,7 +242,7 @@ class DiscoveryEngineService:
                 seen_dedup_keys.add(dedup_key)
                 unique_maxcrawl_records.append(record)
                 unique_hashes.add(dedup_key)
-            self.store.upsert_records(unique_maxcrawl_records)
+            staged_records.extend(unique_maxcrawl_records)
             by_source[maxcrawl_connector.source_name] = len(unique_maxcrawl_records)
             sources_completed += 1
             completed_sources.append(maxcrawl_connector.source_name)
@@ -265,6 +261,9 @@ class DiscoveryEngineService:
 
         cleaned_records = len(unique_hashes)
         duplicates_removed = total_fetched - cleaned_records
+        # Do not replace the current dataset until every requested source has loaded.
+        # A connector failure therefore leaves the last usable discovery snapshot intact.
+        self.store.replace_pipeline_records(staged_records)
         result = {
             "total_records": total_fetched,
             "parsed_records": total_fetched,
@@ -390,8 +389,20 @@ class DiscoveryEngineService:
         unique_records = self.store.count_raw_records()
         unique_record_target = int(os.getenv("MIN_UNIQUE_RECORDS", "1000"))
         last_ingest = self.store.load_run_metadata("last_ingest")
-        parsed_records = int(last_ingest.get("parsed_records", last_ingest.get("total_records", unique_records or 0)))
-        duplicates_removed = int(last_ingest.get("duplicates_removed", max(0, parsed_records - unique_records)))
+        metadata_breakdown = last_ingest.get("source_breakdown", {})
+        metadata_matches_current_data = (
+            isinstance(metadata_breakdown, dict)
+            and int(last_ingest.get("cleaned_records", -1)) == unique_records
+            and {str(source): int(count) for source, count in metadata_breakdown.items()} == source_breakdown
+        )
+        if metadata_matches_current_data:
+            parsed_records = int(last_ingest.get("parsed_records", last_ingest.get("total_records", unique_records)))
+            duplicates_removed = int(last_ingest.get("duplicates_removed", max(0, parsed_records - unique_records)))
+        else:
+            # A previously interrupted run can leave old run metadata beside newer rows.
+            # Report the live database state rather than combining two different runs.
+            parsed_records = unique_records
+            duplicates_removed = 0
         return {
             "source_count": source_type_count,
             "source_type_count": source_type_count,

@@ -1,10 +1,11 @@
 # Myntra-only Kaggle sources
 
+The packaged `myntra-shopping-app-reviews.json.gz` file is the default local source for Myntra app reviews. It replaces the previous expiring signed download link.
+
 Drop only the Myntra-specific Kaggle dataset exports into this folder using these filenames:
 
-- `myntra-shopping-app-reviews.json`
+- `myntra-shopping-app-reviews.json.gz`
   - Source: `https://www.kaggle.com/datasets/jocelyndumlao/shoppingappreviews-dataset`
-  - You can also place the signed Kaggle/Google Storage URL into `myntra-shopping-app-reviews.url`
 - `myntra-fashion-dataset.csv`
   - Source: `https://www.kaggle.com/datasets/manishmathias/myntra-fashion-dataset`
 - `myntra-fashion-products.csv`
@@ -20,6 +21,7 @@ Supported formats:
 
 - `.csv`
 - `.json`
+- `.json.gz`
 - `.jsonl`
 
 The discovery pipeline will auto-detect any of these files and add them as optional Myntra-only sources.

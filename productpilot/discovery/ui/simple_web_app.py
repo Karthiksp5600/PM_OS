@@ -95,6 +95,63 @@ def start_pipeline_job() -> bool:
     return True
 
 
+def start_sqlite_autoload_job() -> bool:
+    """Restore stored records first, falling back to ingestion only when necessary."""
+    with RUN_STATE_LOCK:
+        if RUN_STATE.get("is_running"):
+            return False
+        RUN_STATE.update(
+            status="starting",
+            message="Loading saved discovery data...",
+            sources_completed=0,
+            total_sources=0,
+            completed_sources=[],
+            fetched_records=0,
+            cleaned_records=0,
+            classified_records=0,
+            opportunity_count=0,
+            is_running=True,
+        )
+    worker = threading.Thread(target=execute_sqlite_autoload_job, daemon=True)
+    worker.start()
+    return True
+
+
+def execute_sqlite_autoload_job() -> None:
+    try:
+        stored_records = SERVICE.store.count_raw_records()
+        if not stored_records:
+            raise RuntimeError("No stored records available")
+        update_run_state(
+            status="running",
+            message="Rebuilding insights from saved SQLite data...",
+            fetched_records=stored_records,
+            cleaned_records=stored_records,
+        )
+        classified_count = SERVICE.classify()
+        update_run_state(
+            status="running",
+            message="Ranking saved discovery insights...",
+            classified_records=classified_count,
+        )
+        aggregate_result = SERVICE.aggregate()
+        update_run_state(
+            status="completed",
+            message="Loaded saved discovery data.",
+            fetched_records=stored_records,
+            cleaned_records=stored_records,
+            classified_records=classified_count,
+            opportunity_count=aggregate_result.get("opportunity_count", 0),
+            is_running=False,
+        )
+    except Exception:
+        update_run_state(
+            status="running",
+            message="Saved data unavailable. Starting a fresh pipeline...",
+        )
+        execute_pipeline_job()
+
+
 def execute_pipeline_job() -> None:
     try:
         update_run_state(
@@ -323,6 +380,20 @@ HTML_PAGE = """<!doctype html>
       letter-spacing: 0.08em;
     }
 
+    .summary-loader {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      margin-top: 12px;
+      color: var(--primary-strong);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .summary-loader.active {
+      display: flex;
+    }
+
     .summary-value {
       margin-top: 8px;
       font-size: 28px;
@@ -360,6 +431,22 @@ HTML_PAGE = """<!doctype html>
     }
 
     .global-loader.active {
+      display: flex;
+    }
+
+    .opportunities-loading {
+      display: none;
+      align-items: center;
+      gap: 10px;
+      margin: 0 0 16px;
+      padding: 13px 15px;
+      border: 1px dashed rgba(79, 110, 247, 0.38);
+      border-radius: 12px;
+      color: var(--muted);
+      background: rgba(79, 110, 247, 0.05);
+    }
+
+    .opportunities-loading.active {
       display: flex;
     }
 
@@ -847,13 +934,17 @@ HTML_PAGE = """<!doctype html>
       <div class="summary-card">
         <div>
           <div class="summary-label">Coverage snapshot</div>
-          <div class="summary-value" id="summaryCoverage">No data loaded</div>
-          <div class="summary-note" id="summaryCoverageCopy">Run the slice or reload outputs to populate the latest source coverage and opportunity counts.</div>
+          <div class="summary-value" id="summaryCoverage">Loading data...</div>
+          <div class="summary-note" id="summaryCoverageCopy">Please wait while the dashboard loads.</div>
+          <div id="summaryLoader" class="summary-loader active" role="status" aria-live="polite">
+            <span class="loader-dot"></span>
+            <span id="summaryLoaderText">Loading data...</span>
+          </div>
         </div>
         <div class="live-counter">
           <div class="live-counter-label">Live source counter</div>
-          <div class="live-counter-value" id="liveSourceCounter">0 / 0</div>
-          <div class="live-counter-note" id="liveSourceCounterNote">Waiting for a run to start.</div>
+          <div class="live-counter-value" id="liveSourceCounter">Loading...</div>
+          <div class="live-counter-note" id="liveSourceCounterNote">Checking saved source coverage.</div>
           <div class="completed-sources" id="completedSourcesBox"></div>
         </div>
         <div class="footer-note">
@@ -863,9 +954,9 @@ HTML_PAGE = """<!doctype html>
     </section>
 
     <section class="tab-shell">
-      <div id="globalLoader" class="global-loader" role="status" aria-live="polite">
+      <div id="globalLoader" class="global-loader active" role="status" aria-live="polite">
         <span class="loader-dot"></span>
-        <span id="globalLoaderText">Loading discovery data...</span>
+        <span id="globalLoaderText">Loading data...</span>
       </div>
       <div class="tabs" role="tablist" aria-label="Discovery views">
         <button id="insightsTabBtn" class="tab-button active" type="button" data-tab="insights" role="tab" aria-selected="true">Ranked opportunities</button>
@@ -883,6 +974,10 @@ HTML_PAGE = """<!doctype html>
               <div class="actions">
                 <a id="downloadOpportunitiesBtn" class="button-link secondary" href="/api/ranked-opportunities.md" download="ranked_opportunities.md">Download opportunities (.md)</a>
               </div>
+            </div>
+            <div id="opportunitiesLoading" class="opportunities-loading active" role="status" aria-live="polite">
+              <span class="loader-dot"></span>
+              <span id="opportunitiesLoadingText">Loading data...</span>
             </div>
             <div id="opportunitiesBox" class="opportunities-grid"></div>
           </div>
@@ -997,6 +1092,8 @@ HTML_PAGE = """<!doctype html>
   <script>
     let progressPollTimer = null;
     let latestAnswerMarkdownUrl = '/api/final-answer.md';
+    let dashboardLoadInFlight = true;
+    let latestProgress = { status: 'idle', message: 'Loading data...' };
 
     function byId(id) {
       return document.getElementById(id);
@@ -1214,11 +1311,19 @@ HTML_PAGE = """<!doctype html>
     }
 
     function renderGlobalLoader(progress) {
-      const isLoading = progress.status === 'starting' || progress.status === 'running';
+      latestProgress = progress || latestProgress;
+      const pipelineLoading = latestProgress.status === 'starting' || latestProgress.status === 'running';
+      const isLoading = dashboardLoadInFlight || pipelineLoading;
       byId('globalLoader').classList.toggle('active', isLoading);
+      byId('opportunitiesLoading').classList.toggle('active', isLoading);
+      byId('summaryLoader').classList.toggle('active', isLoading);
       if (isLoading) {
-        byId('globalLoaderText').textContent =
-          'Loading discovery data. ' + (progress.message || 'Preparing pipeline...');
+        const message = pipelineLoading
+          ? (latestProgress.message || 'Preparing pipeline...')
+          : 'Loading data...';
+        byId('globalLoaderText').textContent = message;
+        byId('opportunitiesLoadingText').textContent = message;
+        byId('summaryLoaderText').textContent = message;
       }
     }
 
@@ -1289,6 +1394,9 @@ HTML_PAGE = """<!doctype html>
     }
 
     async function reloadOutputs(mode) {
+      dashboardLoadInFlight = true;
+      renderGlobalLoader(latestProgress);
+      let effectiveProgress = latestProgress;
       try {
         byId('statusBox').textContent = mode === 'reload' ? 'Reloading dashboard...' : 'Loading dashboard...';
         const data = await fetchJson('/api/dashboard');
@@ -1296,7 +1404,7 @@ HTML_PAGE = """<!doctype html>
         const stats = data.stats || {};
         const progress = data.progress || {};
         const progressIsActive = progress.status === 'starting' || progress.status === 'running';
-        const effectiveProgress = progressIsActive || (progress.total_sources || progress.sources_completed)
+        effectiveProgress = progressIsActive || (progress.total_sources || progress.sources_completed)
           ? progress
           : {
               status: (stats.source_type_count || stats.source_count) ? 'completed' : 'idle',
@@ -1319,6 +1427,11 @@ HTML_PAGE = """<!doctype html>
         }
       } catch (error) {
         byId('statusBox').textContent = 'Reload failed: ' + error.message;
+        byId('summaryCoverage').textContent = 'Could not load data';
+        byId('summaryCoverageCopy').textContent = 'Please reload the dashboard to try again.';
+      } finally {
+        dashboardLoadInFlight = false;
+        renderGlobalLoader(effectiveProgress);
       }
     }
 
@@ -1327,6 +1440,7 @@ HTML_PAGE = """<!doctype html>
       byId('liveSourceCounter').textContent = '0 / 0';
       byId('liveSourceCounterNote').textContent = 'Preparing ingestion...';
       byId('completedSourcesBox').innerHTML = '';
+      renderGlobalLoader({ status: 'starting', message: 'Preparing ingestion...' });
       try {
         await fetchJson('/api/run-all', { method: 'POST' });
         startProgressPolling();
@@ -1402,19 +1516,16 @@ class DiscoveryRequestHandler(BaseHTTPRequestHandler):
             self._send_json({"status": "ok"})
             return
         if parsed.path == "/api/dashboard":
-            opportunities_path = ROOT / "productpilot" / "discovery" / "data" / "outputs" / "opportunities.json"
-            opportunities = []
-            if opportunities_path.exists():
-                opportunities = sort_opportunities_payload(json.loads(opportunities_path.read_text(encoding="utf-8")))
             stats = SERVICE.dashboard_stats()
-            has_stored_data = bool(
-                opportunities
-                or stats.get("unique_records")
-                or stats.get("raw_records")
-                or stats.get("parsed_records")
+            opportunities = sort_opportunities_payload(
+                [item.model_dump(mode="json") for item in SERVICE.store.fetch_opportunities()]
             )
-            if not has_stored_data:
-                start_pipeline_job()
+            has_ready_data = bool(
+                opportunities
+                or stats.get("opportunity_count")
+            )
+            if not has_ready_data:
+                start_sqlite_autoload_job()
             self._send_json(
                 {
                     "stats": stats,
@@ -1445,10 +1556,9 @@ class DiscoveryRequestHandler(BaseHTTPRequestHandler):
             )
             return
         if parsed.path == "/api/opportunities":
-            opportunities_path = ROOT / "productpilot" / "discovery" / "data" / "outputs" / "opportunities.json"
-            opportunities = []
-            if opportunities_path.exists():
-                opportunities = sort_opportunities_payload(json.loads(opportunities_path.read_text(encoding="utf-8")))
+            opportunities = sort_opportunities_payload(
+                [item.model_dump(mode="json") for item in SERVICE.store.fetch_opportunities()]
+            )
             self._send_json({"opportunities": opportunities})
             return
         self._send_json({"error": "Not found"}, status=404)
