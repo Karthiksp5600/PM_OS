@@ -73,6 +73,28 @@ def snapshot_run_state() -> Dict[str, Any]:
         return dict(RUN_STATE)
 
 
+def start_pipeline_job() -> bool:
+    """Start one pipeline worker, returning false when a run is already active."""
+    with RUN_STATE_LOCK:
+        if RUN_STATE.get("is_running"):
+            return False
+        RUN_STATE.update(
+            status="starting",
+            message="Preparing discovery data...",
+            sources_completed=0,
+            total_sources=0,
+            completed_sources=[],
+            fetched_records=0,
+            cleaned_records=0,
+            classified_records=0,
+            opportunity_count=0,
+            is_running=True,
+        )
+    worker = threading.Thread(target=execute_pipeline_job, daemon=True)
+    worker.start()
+    return True
+
+
 def execute_pipeline_job() -> None:
     try:
         update_run_state(
@@ -324,6 +346,34 @@ HTML_PAGE = """<!doctype html>
     .tab-shell {
       display: grid;
       gap: 18px;
+    }
+
+    .global-loader {
+      display: none;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 18px;
+      border: 1px solid rgba(79, 110, 247, 0.24);
+      border-radius: 14px;
+      background: rgba(79, 110, 247, 0.08);
+      color: var(--ink);
+    }
+
+    .global-loader.active {
+      display: flex;
+    }
+
+    .loader-dot {
+      width: 10px;
+      height: 10px;
+      flex: 0 0 auto;
+      border-radius: 999px;
+      background: var(--primary);
+      animation: pulse-loader 1.1s ease-in-out infinite;
+    }
+
+    @keyframes pulse-loader {
+      50% { opacity: 0.35; transform: scale(0.72); }
     }
 
     .tabs {
@@ -813,6 +863,10 @@ HTML_PAGE = """<!doctype html>
     </section>
 
     <section class="tab-shell">
+      <div id="globalLoader" class="global-loader" role="status" aria-live="polite">
+        <span class="loader-dot"></span>
+        <span id="globalLoaderText">Loading discovery data...</span>
+      </div>
       <div class="tabs" role="tablist" aria-label="Discovery views">
         <button id="insightsTabBtn" class="tab-button active" type="button" data-tab="insights" role="tab" aria-selected="true">Ranked opportunities</button>
         <button id="coverageTabBtn" class="tab-button" type="button" data-tab="coverage" role="tab" aria-selected="false">Coverage metrics</button>
@@ -1159,7 +1213,17 @@ HTML_PAGE = """<!doctype html>
         'Status: ' + ((progress && progress.message) || 'Ready');
     }
 
+    function renderGlobalLoader(progress) {
+      const isLoading = progress.status === 'starting' || progress.status === 'running';
+      byId('globalLoader').classList.toggle('active', isLoading);
+      if (isLoading) {
+        byId('globalLoaderText').textContent =
+          'Loading discovery data. ' + (progress.message || 'Preparing pipeline...');
+      }
+    }
+
     function renderLiveProgress(progress) {
+      renderGlobalLoader(progress);
       const completed = progress.sources_completed || 0;
       const total = progress.total_sources || 0;
       const completedSources = progress.completed_sources || [];
@@ -1231,7 +1295,8 @@ HTML_PAGE = """<!doctype html>
         const opportunities = data.opportunities || [];
         const stats = data.stats || {};
         const progress = data.progress || {};
-        const effectiveProgress = (progress.total_sources || progress.sources_completed)
+        const progressIsActive = progress.status === 'starting' || progress.status === 'running';
+        const effectiveProgress = progressIsActive || (progress.total_sources || progress.sources_completed)
           ? progress
           : {
               status: (stats.source_type_count || stats.source_count) ? 'completed' : 'idle',
@@ -1249,6 +1314,9 @@ HTML_PAGE = """<!doctype html>
         renderSources(stats);
         renderLiveProgress(effectiveProgress);
         renderDashboardStatus(stats, opportunities, effectiveProgress, mode);
+        if (effectiveProgress.status === 'starting' || effectiveProgress.status === 'running') {
+          startProgressPolling();
+        }
       } catch (error) {
         byId('statusBox').textContent = 'Reload failed: ' + error.message;
       }
@@ -1338,9 +1406,18 @@ class DiscoveryRequestHandler(BaseHTTPRequestHandler):
             opportunities = []
             if opportunities_path.exists():
                 opportunities = sort_opportunities_payload(json.loads(opportunities_path.read_text(encoding="utf-8")))
+            stats = SERVICE.dashboard_stats()
+            has_stored_data = bool(
+                opportunities
+                or stats.get("unique_records")
+                or stats.get("raw_records")
+                or stats.get("parsed_records")
+            )
+            if not has_stored_data:
+                start_pipeline_job()
             self._send_json(
                 {
-                    "stats": SERVICE.dashboard_stats(),
+                    "stats": stats,
                     "opportunities": opportunities,
                     "progress": snapshot_run_state(),
                 }
@@ -1379,12 +1456,9 @@ class DiscoveryRequestHandler(BaseHTTPRequestHandler):
     def do_POST(self) -> None:
         parsed = urlparse(self.path)
         if parsed.path == "/api/run-all":
-            state = snapshot_run_state()
-            if state.get("is_running"):
+            if not start_pipeline_job():
                 self._send_json({"started": False, "status": "already_running"})
                 return
-            worker = threading.Thread(target=execute_pipeline_job, daemon=True)
-            worker.start()
             self._send_json({"started": True, "status": "running"})
             return
         if parsed.path == "/api/ask":
